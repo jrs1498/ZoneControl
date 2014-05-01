@@ -8,7 +8,10 @@ app.game =
 	ZONESPERSIDE:		8,
 	ZONESIZE:		32,
 
-	// Variables - THREE
+	// Variables - app
+	animID:			undefined,
+
+	// Variables - ThreeJs
 	renderer:		undefined,
 	scene:			undefined,
 	camera:			undefined,
@@ -60,6 +63,12 @@ app.game =
 	initGame : function()
 	{
 		app.log("game.initGame()");
+
+		// Test
+		var geo = new THREE.PlaneGeometry(2000, 2000, 40, 40);
+		var mat = new THREE.MeshPhongMaterial({color: 0xff00ff, overdraw: true});
+		var floor = new THREE.Mesh(geo, mat);
+		this.scene.add(floor);
 	},
 
 
@@ -72,9 +81,13 @@ app.game =
 	*/
 	gameLoop : function()
 	{
-		app.animationID = requestAnimationFrame(this.gameLoop.bind(this));
 		this.update();
 		this.draw();
+
+		// NEEDS TO BE FIXED
+		// When using app.animationID it does not refresh for some reason
+		this.animID = requestAnimationFrame(this.gameLoop.bind(this));
+		//app.animationID = requestAnimationFrame(this.gameLoop.bind(this));
 	},
 
 	/**
@@ -83,7 +96,7 @@ app.game =
 	*/
 	update : function()
 	{
-
+		this.camera.position.y -= 0.5;
 	},
 
 	/**
@@ -92,6 +105,6 @@ app.game =
 	*/
 	draw : function()
 	{
-
+		this.renderer.render(this.scene, this.camera);
 	}
 };

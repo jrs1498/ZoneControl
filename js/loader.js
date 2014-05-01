@@ -1,6 +1,9 @@
 "use strict";
 var app = app || {};
 
+app.animationID = undefined;
+app.paused = false;
+
 app.debug = true;
 app.log = function(msg)
 {
@@ -8,8 +11,6 @@ app.log = function(msg)
 		console.log(msg);
 }
 
-app.animationID = undefined;
-app.paused = false;
 
 app.keydown = [];
 
