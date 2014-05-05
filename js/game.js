@@ -5,15 +5,17 @@
 "use strict";
 var app = app || {};
 
-app.game = {
+app.game = 
+{
 	// ThreeJS
 	mRenderer: 	undefined,
 	mScene: 		undefined,
 	mCamera: 	undefined,
 
+	// Scene
 	myobjects: [],
 	paused: false,
-	dt: 1/60,
+	mDt: 1/60,
 		
 	/**
 	* init
@@ -59,6 +61,8 @@ app.game = {
 	{
 		app.log("app.game.initGame() called");
 		
+		app.camcontrols.init();
+		
 		var geo = new THREE.PlaneGeometry(2000, 2000, 40, 40);
 		var mat = new THREE.MeshPhongMaterial({color: 0xFF00FF, overdraw: true});
 		var floor = new THREE.Mesh(geo, mat);
@@ -75,7 +79,7 @@ app.game = {
 	gameLoop: function()
 	{
 		app.animationID = requestAnimationFrame(this.gameLoop.bind(this));
-		this.update();
+		this.update(this.mDt);
 		this.draw();
 	},
 
@@ -83,10 +87,9 @@ app.game = {
 	* update
 	*	Primary game update function
 	*/
-	update: function()
+	update: function(dt)
 	{
-		var target = new THREE.Vector3(0, 0, 0);
-		this.mCamera.lookAt(target);
+		app.camcontrols.update(dt);
 	},
 
 	/**

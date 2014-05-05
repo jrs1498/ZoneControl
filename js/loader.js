@@ -38,6 +38,7 @@ app.log = function(string)
 	queue.on("fileload", handleFileLoad, this);
 	queue.on("complete", complete, this);
 	queue.loadFile("js/lib/three.min.js");
+	queue.loadFile("js/camcontrols.js");
 	queue.loadFile("js/game.js");
 	
 	function handleFileLoad(e){
