@@ -26,6 +26,13 @@ app.paused = false;
 // key daemon array
 app.keydown = [];
 
+app.DEBUG = true;
+app.log = function(string)
+{
+	if(app.DEBUG)
+		console.log(string);
+};
+
 (function(){
 	var queue = new createjs.LoadQueue(false);
 	queue.on("fileload", handleFileLoad, this);
