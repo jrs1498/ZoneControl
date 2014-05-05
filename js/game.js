@@ -1,16 +1,15 @@
-// city.js
+/**
+* game.js
+*	Root game file
+*/
 "use strict";
-// if app exists use the existing copy
-// else create a new object literal
 var app = app || {};
 
 app.game = {
-    	// CONSTANT properties
-    	
-	// Variables : ThreeJS
-	renderer: 	undefined,
-	scene: 		undefined,
-	camera: 	undefined,
+	// ThreeJS
+	mRenderer: 	undefined,
+	mScene: 		undefined,
+	mCamera: 	undefined,
 
 	myobjects: [],
 	paused: false,
@@ -37,6 +36,19 @@ app.game = {
 	initThreeJS: function()
 	{
 		app.log("app.game.initThreeJS() called");
+		
+		this.mRenderer = new THREE.WebGLRenderer({antialias: true});
+		this.mRenderer.setSize(window.innerWidth, window.innerHeight);
+		this.mRenderer.shadowMapEnabled = true;
+		document.body.appendChild(this.mRenderer.domElement);
+		
+		this.mScene = new THREE.Scene();
+		this.mScene.fog = new THREE.FogExp2(0x9db3b5, 0.002);
+		
+		this.mCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+		this.mCamera.position.y = 400;
+		this.mCamera.position.z = 400;
+		this.mCamera.position.x = -45 * Math.PI / 180;
 	},
 
 	/**
@@ -46,6 +58,13 @@ app.game = {
 	initGame: function()
 	{
 		app.log("app.game.initGame() called");
+		
+		var geo = new THREE.PlaneGeometry(2000, 2000, 40, 40);
+		var mat = new THREE.MeshPhongMaterial({color: 0xFF00FF, overdraw: true});
+		var floor = new THREE.Mesh(geo, mat);
+		floor.rotation.x = -0.5 * Math.PI;
+		floor.receiveShadow = true;
+		this.mScene.add(floor);
 	},
     	
 	/**
@@ -66,6 +85,8 @@ app.game = {
 	*/
 	update: function()
 	{
+		var target = new THREE.Vector3(0, 0, 0);
+		this.mCamera.lookAt(target);
 	},
 
 	/**
@@ -74,6 +95,6 @@ app.game = {
 	*/
 	draw: function()
 	{
-		//this.renderer.render(this.scene, this.camera);
+		this.mRenderer.render(this.mScene, this.mCamera);
 	}
 };
