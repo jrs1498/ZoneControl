@@ -11,6 +11,7 @@ app.zone = function()
 	{
 		this.mMesh = undefined;
 		this.mOwner = undefined;
+		this.mOccupants = [0, 0, 0, 0];
 	};
 
 	var p = zone.prototype;
@@ -48,6 +49,22 @@ app.zone = function()
 	{
 		this.mOwner = owner;
 		this.mMesh.material = new THREE.MeshPhongMaterial({color:this.mOwner.mColor, overdraw: true});
+	};
+
+	p.ownerAttachedCharacter = function(owner)
+	{
+		this.mOccupants[owner.mPlayerID]++;
+		app.log("zone now has " + this.mOccupants[owner.mPlayerID]);
+
+		if(this.mOccupants[owner.mPlayerID] >= 2)
+			this.setOwner(owner);
+	};
+
+	p.ownerRemovedCharacter = function(owner)
+	{
+		this.mOccupants[owner.mPlayerID]--;
+
+		app.log("zone now had " + this.mOccupants[owner.mPlayerID]);
 	};
 
 	return zone;

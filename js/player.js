@@ -7,8 +7,9 @@ var app = app || {};
 
 app.player = function()
 {
-	function player()
+	function player(id)
 	{
+		this.mPlayerID = id;
 		this.mColor = undefined;
 	};
 

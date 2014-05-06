@@ -20,7 +20,7 @@ app.game =
 	mWorldWidth:	undefined,
 	mWorldDepth:	undefined,
 
-	mZonesPerSide:	6,
+	mZonesPerSide:	8,
 	mZoneWidth:	undefined,
 	mZoneHeight:	undefined,
 	mZones: 	[],
@@ -96,16 +96,16 @@ app.game =
 		this.mZoneDepth = this.mWorldDepth / this.mZonesPerSide;
 
 		// Players
-		this.mPlayerRed = new app.player();
+		this.mPlayerRed = new app.player(0);
 		this.mPlayerRed.mColor = 0xed2211;
 
-		this.mPlayerGreen = new app.player();
+		this.mPlayerGreen = new app.player(1);
 		this.mPlayerGreen.mColor = 0x22ed11;
 
-		this.mPlayerOrange = new app.player();
+		this.mPlayerOrange = new app.player(2);
 		this.mPlayerOrange.mColor = 0x884444;
 		
-		this.mPlayerWhite = new app.player();
+		this.mPlayerWhite = new app.player(3);
 		this.mPlayerWhite.mColor = 0xffffff;
 	
 		// Scene lighting
@@ -162,6 +162,7 @@ app.game =
 	{
 		this.mZones[0][0].setOwner(this.mPlayerRed);
 		this.mZones[this.mZonesPerSide-1][0].setOwner(this.mPlayerOrange);
+		this.mZones[0][this.mZonesPerSide-1].setOwner(this.mPlayerGreen);
 		this.mZones[this.mZonesPerSide-1][this.mZonesPerSide-1].setOwner(this.mPlayerWhite);
 	},
     	
@@ -185,7 +186,8 @@ app.game =
 	{
 		app.controls.update(dt);
 
-		// Should we spawn a wave of units?
+		// Update zones
+		this.updateZoneOwnerships();
 		this.mLastSpawn += dt;
 		if((this.mLastSpawn += dt) > this.mTimePerSpawn)
 		{
@@ -222,11 +224,42 @@ app.game =
 	},
 
 	/**
+	* notifyCharacterChangedZone
+	*	Used by characters to inform the game level that they have change zones
+	*
+	* @param character : calling character
+	*/
+	notifyCharacterChangedZone: function(
+		character, 
+		prevZoneRow, 
+		prevZoneCol,
+		currZoneRow,
+		currZoneCol)
+	{
+		app.log("character changed zone");
+		if(prevZoneRow != undefined && prevZoneCol != undefined)
+			this.mZones[prevZoneRow][prevZoneCol].
+				ownerRemovedCharacter(character.mOwner);
+
+		if(currZoneRow != undefined && currZoneCol != undefined)
+			this.mZones[currZoneRow][currZoneCol].
+				ownerAttachedCharacter(character.mOwner);
+	},
+
+	/**
+	* updateZoneOwnerships
+	*	Logic for determining who controls each zone
+	*/
+	updateZoneOwnerships: function()
+	{
+	},
+
+	/**
 	* draw
 	*	Primary game draw function
 	*/
 	draw: function()
 	{
 		this.mRenderer.render(this.mScene, this.mCamera);
-	},
+	}
 };

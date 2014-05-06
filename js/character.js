@@ -21,6 +21,8 @@ app.character = function()
 		this.mMesh 		= undefined;
 		this.mState 		= this.State.IDLE;
 		this.mOwner 		= owner;
+		this.mCurrZoneRow	= undefined;
+		this.mCurrZoneCol	= undefined;
 	};
 
 	var p = character.prototype;
@@ -50,6 +52,31 @@ app.character = function()
 	*/
 	p.update = function(dt)
 	{
+		// Check for containing zone
+		var zoneRow = 
+			(this.mMesh.position.x - 
+			(this.mMesh.position.x % app.game.mZoneWidth)) /
+			app.game.mZoneWidth;
+		var zoneCol =
+			(this.mMesh.position.z -
+			(this.mMesh.position.z % app.game.mZoneDepth)) /
+			app.game.mZoneDepth;
+
+		if(zoneRow != this.mCurrZoneRow || this.mCurrZoneRow == undefined
+		|| zoneCol != this.mCurrZoneCol || this.mCurrZoneCol == undefined)
+		{
+			app.game.notifyCharacterChangedZone(
+				this, 
+				this.mCurrZoneRow, 
+				this.mCurrZoneCol,
+				zoneRow,
+				zoneCol);
+
+			this.mCurrZoneRow = zoneRow;
+			this.mCurrZoneCol = zoneCol;
+		}
+
+		// Update according to character state
 		switch(this.mState)
 		{
 		case this.State.IDLE:
