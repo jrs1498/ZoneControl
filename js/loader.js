@@ -12,11 +12,15 @@ var app = app || {};
 
 // CONSTANTS of app
 app.KEYBOARD = {
-	"KEY_LEFT": 37, 
-	"KEY_UP": 38, 
-	"KEY_RIGHT": 39, 
-	"KEY_DOWN": 40,
-	"KEY_SPACE": 32
+	"KEY_LEFT": 	37, 
+	"KEY_UP": 	38, 
+	"KEY_RIGHT": 	39, 
+	"KEY_DOWN": 	40,
+	"KEY_SPACE": 	32,
+	"KEY_W":	87,
+	"KEY_A":	65,
+	"KEY_S":	83,
+	"KEY_D":	68
 };
 
 // properties of app
@@ -38,8 +42,9 @@ app.log = function(string)
 	queue.on("fileload", handleFileLoad, this);
 	queue.on("complete", complete, this);
 	queue.loadFile("js/lib/three.min.js");
-	queue.loadFile("js/camcontrols.js");
+	queue.loadFile("js/controls.js");
 	queue.loadFile("js/game.js");
+	queue.loadFile("js/zone.js");
 	
 	function handleFileLoad(e){
 		console.log(e + " loaded");
@@ -72,13 +77,19 @@ app.log = function(string)
 			
 			// event listeners
 			window.addEventListener("keydown",function(e){
-				console.log("keydown=" + e.keyCode);
-				app.keydown[e.keyCode] = true;
+				if(!app.keydown[e.keyCode])
+				{
+					app.keydown[e.keyCode] = true;
+					app.controls.injectKeyDown(e);
+				}
 			});
 				
 			window.addEventListener("keyup",function(e){
-				console.log("keyup=" + e.keyCode);
-				app.keydown[e.keyCode] = false;
+				if(app.keydown[e.keyCode])
+				{
+					app.keydown[e.keyCode] = false;
+					app.controls.injectKeyUp(e);
+				}
 			});
 			
 			
