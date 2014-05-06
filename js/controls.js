@@ -8,7 +8,7 @@ var app = app || {};
 app.controls =
 {
 	mCamera:		undefined,
-	mCamSpeed:		512.0,
+	mCamSpeed:		768.0,
 	mCamVelocity:		undefined,
 	mCamTilt:		128.0,
 	mCamTiltBoundFactor:	0.1,

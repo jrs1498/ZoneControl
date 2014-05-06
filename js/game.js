@@ -9,22 +9,29 @@ app.game =
 {
 	// ThreeJS
 	mRenderer: 	undefined,
-	mScene: 		undefined,
+	mScene: 	undefined,
 	mCamera: 	undefined,
 
 	// Game Level
 	mWorldXMin:	0.0,
-	mWorldXMax:	640.0,
+	mWorldXMax:	1024.0,
 	mWorldZMin:	0.0,
-	mWorldZMax:	640.0,
+	mWorldZMax:	1024.0,
 	mWorldWidth:	undefined,
 	mWorldDepth:	undefined,
 
-	mZonesPerSide:	8,
+	mZonesPerSide:	6,
 	mZoneWidth:	undefined,
 	mZoneHeight:	undefined,
+	mZones: 	[],
 
-	mZones: 	undefined,	
+	mLastSpawn:	0.0,
+	mTimePerSpawn:	10.0,
+
+	mCharWidth:	24,
+	mCharHeight:	32,
+	mCharTilt:	-(3.14159 / 8),
+	mCharacters:	[],
 	myobjects: [],
 	paused: false,
 	mDt: 1/60,
@@ -38,6 +45,7 @@ app.game =
 		app.log("app.game.init() called");
 		this.initThreeJS();
 		this.initGame();
+		this.initTestData();
 
 		app.log("--- START GAME LOOP --");
 		this.gameLoop();
@@ -93,12 +101,19 @@ app.game =
 		{
 			var zoneGeo = new THREE.BoxGeometry(w, h, d, 1, 1, 1);
 			var zoneMat = new THREE.MeshPhongMaterial({color: color, overdraw: true});
-			var zone = new THREE.Mesh(zoneGeo, zoneMat);
-			zone.position = new THREE.Vector3(x,y-(w/2),z);
-			zone.receiveShadow = true;
-			app.game.mScene.add(zone);
+			var zoneMesh = new THREE.Mesh(zoneGeo, zoneMat);
+			zoneMesh.position = new THREE.Vector3(x,y-(h/2),z);
+			//zoneMesh.receiveShadow = true;
+			app.game.mScene.add(zoneMesh);
+
+			var zone = new app.zone();
+			zone.mMesh = zoneMesh;
+			
+			return zone;
 		}
 		for(var x = 0; x < this.mZonesPerSide; x++)
+		{
+			this.mZones[x] = [];
 			for(var z = 0; z < this.mZonesPerSide; z++)
 			{
 				var par = (x % 2) + (z % 2);
@@ -106,7 +121,7 @@ app.game =
 				if(par == 1)
 					color = 0x0022aa;
 
-				createZone(
+				var zone = createZone(
 					x * this.mZoneWidth,
 					0.0,
 					z * this.mZoneDepth,
@@ -114,7 +129,23 @@ app.game =
 					this.mZoneWidth * 2.0,
 					this.mZoneDepth,
 					color);
+
+				this.mZones[x][z] = zone;
 			}
+		}
+	},
+
+	/**
+	* initTestData
+	*	Dedicated initialization function for test data
+	*	Needs to be removed in final version
+	*/
+	initTestData: function()
+	{
+		this.mZones[0][0].mOwner = 1;
+		this.mZones[0][this.mZonesPerSide-1].mOwner = 1;
+		this.mZones[this.mZonesPerSide-1][0].mOwner = 1;
+		this.mZones[this.mZonesPerSide-1][this.mZonesPerSide-1].mOwner = 1;
 	},
     	
 	/**
@@ -136,6 +167,34 @@ app.game =
 	update: function(dt)
 	{
 		app.controls.update(dt);
+
+		// Should we spawn a wave of units?
+		this.mLastSpawn += dt;
+		if((this.mLastSpawn += dt) > this.mTimePerSpawn)
+		{
+			this.mLastSpawn %= this.mTimePerSpawn;
+			app.log("Spawning a wave");
+			for(var row = 0; row < this.mZones.length; row++)
+				for(var col = 0; col < this.mZones[row].length; col++)
+				{
+					this.mZones[row][col].spawnCharacter();
+				}
+			
+			// For now, give random destinations
+			for(var i = 0; i < this.mCharacters.length; i++)
+			{
+				this.mCharacters[i].setDestination(
+					Math.random() * this.mWorldWidth,
+					Math.random() * this.mWorldDepth);
+			}
+			
+		}
+
+		// Update characters
+		for(var i = 0; i < this.mCharacters.length; i++)
+		{
+			this.mCharacters[i].update(dt);
+		}
 	},
 
 	/**

@@ -45,6 +45,7 @@ app.log = function(string)
 	queue.loadFile("js/controls.js");
 	queue.loadFile("js/game.js");
 	queue.loadFile("js/zone.js");
+	queue.loadFile("js/character.js");
 	
 	function handleFileLoad(e){
 		console.log(e + " loaded");
