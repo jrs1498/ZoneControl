@@ -26,8 +26,6 @@ app.zone = function()
 		if(this.mOwner == undefined)
 			return;
 
-		app.log("Zone is spawning a character");
-
 		var characterTexture = THREE.ImageUtils.loadTexture("./images/unit.png");
 
 		var characterGeo = new THREE.PlaneGeometry(40, 40, 1, 1);
@@ -39,7 +37,7 @@ app.zone = function()
 					this.mMesh.position.z);
 		characterMesh.rotation.set(app.game.mCharTilt, 0, 0);
 
-		var character = new app.character();
+		var character = new app.character(this.mOwner);
 		character.mMesh = characterMesh;
 		app.game.mCharacters.push(character);
 

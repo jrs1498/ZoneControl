@@ -31,7 +31,7 @@ app.game =
 	mPlayerWhite:	undefined,
 
 	mLastSpawn:	0.0,
-	mTimePerSpawn:	5.0,
+	mTimePerSpawn:	10.0,
 
 	mCharWidth:	24,
 	mCharHeight:	32,
@@ -161,9 +161,6 @@ app.game =
 	initTestData: function()
 	{
 		this.mZones[0][0].setOwner(this.mPlayerRed);
-		this.mZones[0][1].setOwner(this.mPlayerRed);
-		this.mZones[1][0].setOwner(this.mPlayerRed);
-		this.mZones[0][this.mZonesPerSide-1].setOwner(this.mPlayerGreen);
 		this.mZones[this.mZonesPerSide-1][0].setOwner(this.mPlayerOrange);
 		this.mZones[this.mZonesPerSide-1][this.mZonesPerSide-1].setOwner(this.mPlayerWhite);
 	},
@@ -205,12 +202,19 @@ app.game =
 			{
 				this.mCharacters[i].setDestination(
 					Math.random() * this.mWorldWidth,
-					Math.random() * this.mWorldDepth);
+					Math.random() * this.mWorldDepth,
+					true);
 			}
 			
 		}
 
-		// Update characters
+		// Filter character array
+		this.mCharacters = this.mCharacters.filter(function(c)
+			{
+				if(!c.mActive) 
+					app.game.mScene.remove(c.mMesh);
+				return c.mActive;
+			});
 		for(var i = 0; i < this.mCharacters.length; i++)
 		{
 			this.mCharacters[i].update(dt);
@@ -224,5 +228,5 @@ app.game =
 	draw: function()
 	{
 		this.mRenderer.render(this.mScene, this.mCamera);
-	}
+	},
 };
