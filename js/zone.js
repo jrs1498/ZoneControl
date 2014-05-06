@@ -54,8 +54,6 @@ app.zone = function()
 	p.ownerAttachedCharacter = function(owner)
 	{
 		this.mOccupants[owner.mPlayerID]++;
-		app.log("zone now has " + this.mOccupants[owner.mPlayerID]);
-
 		if(this.mOccupants[owner.mPlayerID] >= 2)
 			this.setOwner(owner);
 	};
@@ -63,8 +61,6 @@ app.zone = function()
 	p.ownerRemovedCharacter = function(owner)
 	{
 		this.mOccupants[owner.mPlayerID]--;
-
-		app.log("zone now had " + this.mOccupants[owner.mPlayerID]);
 	};
 
 	return zone;

@@ -236,7 +236,6 @@ app.game =
 		currZoneRow,
 		currZoneCol)
 	{
-		app.log("character changed zone");
 		if(prevZoneRow != undefined && prevZoneCol != undefined)
 			this.mZones[prevZoneRow][prevZoneCol].
 				ownerRemovedCharacter(character.mOwner);
