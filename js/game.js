@@ -25,12 +25,17 @@ app.game =
 	mZoneHeight:	undefined,
 	mZones: 	[],
 
+	mPlayerRed:	undefined,
+	mPlayerGreen:	undefined,
+	mPlayerOrange:	undefined,
+	mPlayerWhite:	undefined,
+
 	mLastSpawn:	0.0,
-	mTimePerSpawn:	10.0,
+	mTimePerSpawn:	5.0,
 
 	mCharWidth:	24,
 	mCharHeight:	32,
-	mCharTilt:	-(3.14159 / 8),
+	mCharTilt:	-(3.14159 / 4),
 	mCharacters:	[],
 	myobjects: [],
 	paused: false,
@@ -89,9 +94,22 @@ app.game =
 		this.mWorldDepth = this.mWorldZMax - this.mWorldZMin;
 		this.mZoneWidth = this.mWorldWidth / this.mZonesPerSide;
 		this.mZoneDepth = this.mWorldDepth / this.mZonesPerSide;
+
+		// Players
+		this.mPlayerRed = new app.player();
+		this.mPlayerRed.mColor = 0xed2211;
+
+		this.mPlayerGreen = new app.player();
+		this.mPlayerGreen.mColor = 0x22ed11;
+
+		this.mPlayerOrange = new app.player();
+		this.mPlayerOrange.mColor = 0x884444;
+		
+		this.mPlayerWhite = new app.player();
+		this.mPlayerWhite.mColor = 0xffffff;
 	
 		// Scene lighting
-		var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+		var directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
 		directionalLight.position.set(0,10,0);
 		directionalLight.rotation.set(-15, 0, 0);
 		this.mScene.add(directionalLight);
@@ -142,10 +160,12 @@ app.game =
 	*/
 	initTestData: function()
 	{
-		this.mZones[0][0].mOwner = 1;
-		this.mZones[0][this.mZonesPerSide-1].mOwner = 1;
-		this.mZones[this.mZonesPerSide-1][0].mOwner = 1;
-		this.mZones[this.mZonesPerSide-1][this.mZonesPerSide-1].mOwner = 1;
+		this.mZones[0][0].setOwner(this.mPlayerRed);
+		this.mZones[0][1].setOwner(this.mPlayerRed);
+		this.mZones[1][0].setOwner(this.mPlayerRed);
+		this.mZones[0][this.mZonesPerSide-1].setOwner(this.mPlayerGreen);
+		this.mZones[this.mZonesPerSide-1][0].setOwner(this.mPlayerOrange);
+		this.mZones[this.mZonesPerSide-1][this.mZonesPerSide-1].setOwner(this.mPlayerWhite);
 	},
     	
 	/**

@@ -28,8 +28,10 @@ app.zone = function()
 
 		app.log("Zone is spawning a character");
 
+		var characterTexture = THREE.ImageUtils.loadTexture("./images/unit.png");
+
 		var characterGeo = new THREE.PlaneGeometry(40, 40, 1, 1);
-		var characterMat = new THREE.MeshPhongMaterial({color: 0xffffff, overdraw: true});
+		var characterMat = new THREE.MeshPhongMaterial({color: this.mOwner.mColor, overdraw: true, map: characterTexture, transparent: true});
 		var characterMesh = new THREE.Mesh(characterGeo, characterMat);
 		characterMesh.position = new THREE.Vector3(
 					this.mMesh.position.x,	
@@ -42,6 +44,12 @@ app.zone = function()
 		app.game.mCharacters.push(character);
 
 		app.game.mScene.add(characterMesh);
+	};
+
+	p.setOwner = function(owner)
+	{
+		this.mOwner = owner;
+		this.mMesh.material = new THREE.MeshPhongMaterial({color:this.mOwner.mColor, overdraw: true});
 	};
 
 	return zone;
