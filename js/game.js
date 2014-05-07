@@ -25,13 +25,11 @@ app.game =
 	mZoneHeight:	undefined,
 	mZones: 	[],
 
-	mPlayerRed:	undefined,
-	mPlayerGreen:	undefined,
-	mPlayerOrange:	undefined,
-	mPlayerWhite:	undefined,
+	mPlayers:		[],
 
 	mLastSpawn:	0.0,
 	mTimePerSpawn:	10.0,
+	mSpawnStatusBar: undefined,
 
 	mCharWidth:	24,
 	mCharHeight:	32,
@@ -50,11 +48,10 @@ app.game =
 		app.log("app.game.init() called");
 		this.initThreeJS();
 		this.initGame();
-		this.initTestData();
 
 		app.log("--- START GAME LOOP --");
 		this.gameLoop();
-    	},
+    },
 
 	/**
 	* initThreeJS
@@ -89,81 +86,144 @@ app.game =
 		
 		app.controls.init(this.mCamera);
 		
-		// World / zone dimendions
+		// World / zone dimensions
 		this.mWorldWidth = this.mWorldXMax - this.mWorldXMin;
 		this.mWorldDepth = this.mWorldZMax - this.mWorldZMin;
 		this.mZoneWidth = this.mWorldWidth / this.mZonesPerSide;
 		this.mZoneDepth = this.mWorldDepth / this.mZonesPerSide;
-
-		// Players
-		this.mPlayerRed = new app.player(0);
-		this.mPlayerRed.mColor = 0xed2211;
-
-		this.mPlayerGreen = new app.player(1);
-		this.mPlayerGreen.mColor = 0x22ed11;
-
-		this.mPlayerOrange = new app.player(2);
-		this.mPlayerOrange.mColor = 0x884444;
-		
-		this.mPlayerWhite = new app.player(3);
-		this.mPlayerWhite.mColor = 0xffffff;
 	
 		// Scene lighting
 		var directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
-		directionalLight.position.set(0,10,0);
-		directionalLight.rotation.set(-15, 0, 0);
+		//directionalLight.position.set(0,10,0);
+		//directionalLight.rotation.set(90.0, 0, 1.0);
+		directionalLight.rotation.x = 3.14159 / 3.0;
 		this.mScene.add(directionalLight);
+		
+		var hemiLight = new THREE.HemisphereLight(0x444444, 0x444444, 0.25);
+		this.mScene.add(hemiLight);
 
 		// Build zones
-		function createZone(x, y, z, w, h, d, color)
-		{
-			var zoneGeo = new THREE.BoxGeometry(w, h, d, 1, 1, 1);
-			var zoneMat = new THREE.MeshPhongMaterial({color: color, overdraw: true});
-			var zoneMesh = new THREE.Mesh(zoneGeo, zoneMat);
-			zoneMesh.position = new THREE.Vector3(x,y-(h/2),z);
-			//zoneMesh.receiveShadow = true;
-			app.game.mScene.add(zoneMesh);
-
-			var zone = new app.zone();
-			zone.mMesh = zoneMesh;
-			
-			return zone;
-		}
 		for(var x = 0; x < this.mZonesPerSide; x++)
 		{
 			this.mZones[x] = [];
 			for(var z = 0; z < this.mZonesPerSide; z++)
 			{
 				var par = (x % 2) + (z % 2);
-				var color = 0x22aa88;
+				var color = 0x382216;
 				if(par == 1)
-					color = 0x0022aa;
-
-				var zone = createZone(
-					x * this.mZoneWidth,
+					color = 0x9E9692;
+					
+				var zone = new app.zone(
+					x * this.mZoneWidth + this.mZoneWidth / 2.0,
 					0.0,
-					z * this.mZoneDepth,
+					z * this.mZoneDepth + this.mZoneDepth / 2.0,
 					this.mZoneWidth,
 					this.mZoneWidth * 2.0,
 					this.mZoneDepth,
-					color);
-
+					color, 0.8);
+                                
 				this.mZones[x][z] = zone;
 			}
 		}
+		
+		// -- BUILD LEVEL GEOMETRY --
+		var baseWidth = this.mWorldWidth + 512.0;
+		var baseDepth = this.mWorldDepth + 512.0;
+		var baseGeo = new THREE.BoxGeometry(baseWidth, this.mWorldWidth / 2.0, baseDepth);
+		var baseMat = new THREE.MeshPhongMaterial({color: 0xa0f93b1, overdraw: true});
+		var baseMesh = new THREE.Mesh(baseGeo, baseMat);
+		baseMesh.position.set(
+			this.mWorldWidth / 2.0,
+			-384.0,
+			this.mWorldDepth / 2.0);
+		this.mScene.add(baseMesh);
+		
+		var largePieceSize = 256.0;
+		var largePieceGeo = new THREE.BoxGeometry(largePieceSize, this.mWorldWidth / 2.0, largePieceSize);
+		var largePieceMat = new THREE.MeshPhongMaterial({color: 0xEFEFD2, overdraw: true});
+		
+		var largeLeftMesh = new THREE.Mesh(largePieceGeo, largePieceMat);
+		largeLeftMesh.position.set(
+			baseMesh.position.x - baseWidth / 3.0 - largePieceSize / 2.0,
+			-128.0,
+			baseMesh.position.z);
+		this.mScene.add(largeLeftMesh);
+		
+		var largeRightMesh = new THREE.Mesh(largePieceGeo, largePieceMat);
+		largeRightMesh.position.set(
+			baseMesh.position.x + baseWidth / 3.0 + largePieceSize / 2.0,
+			-128.0,
+			baseMesh.position.z);
+		this.mScene.add(largeRightMesh);
+		
+		var sideThickness = 64.0;
+		var wallSideGeo = new THREE.BoxGeometry(sideThickness, this.mWorldWidth / 2.0, (this.mZonesPerSide + 1) * this.mZoneDepth);
+		var wallSideMat = new THREE.MeshPhongMaterial({color: 0xCC8947, overdraw: true});
+		
+		var leftWallMesh = new THREE.Mesh(wallSideGeo, wallSideMat);
+		leftWallMesh.position.set(
+			baseMesh.position.x - ((this.mZonesPerSide * this.mZoneWidth) / 2.0) - sideThickness / 2.0,
+			-224.0,
+			baseMesh.position.z);
+		this.mScene.add(leftWallMesh);
+		
+		var rightWallMesh = new THREE.Mesh(wallSideGeo, wallSideMat);
+		rightWallMesh.position.set(
+			baseMesh.position.x + ((this.mZonesPerSide * this.mZoneWidth) / 2.0) + sideThickness / 2.0,
+			-224.0,
+			baseMesh.position.z);
+		this.mScene.add(rightWallMesh);
+		
+		var wallTopGeo = new THREE.BoxGeometry((this.mZonesPerSide * this.mZoneWidth), this.mWorldWidth / 2.0, sideThickness);
+		
+		var topWallMesh = new THREE.Mesh(wallTopGeo, wallSideMat);
+		topWallMesh.position.set(
+			baseMesh.position.x,
+			-224.0,
+			baseMesh.position.z - ((this.mZonesPerSide * this.mZoneDepth) / 2.0) - sideThickness / 2.0);
+		this.mScene.add(topWallMesh);
+		
+		var bottomWallMesh = new THREE.Mesh(wallTopGeo, wallSideMat);
+		bottomWallMesh.position.set(
+			baseMesh.position.x,
+			-224.0,
+			baseMesh.position.z + ((this.mZonesPerSide * this.mZoneDepth) / 2.0) + sideThickness / 2.0);
+		this.mScene.add(bottomWallMesh);
+		// -- END LEVEL GEOMETRY --
+		
+		this.mSpawnStatusBar = new app.statusbar(
+			(this.mZonesPerSide * this.mZoneWidth) / 2.0,
+			32.0,
+			-32.0,
+			this.mZonesPerSide * this.mZoneWidth,
+			24.0);
+		this.mSpawnStatusBar.setColor(0x00ff00);
+		this.mSpawnStatusBar.setStatus(1.0);
+		
+		// Players
+		this.createPlayer(0xffffff, 0, 0);
+		this.createPlayer(0xff0000, 0, this.mZonesPerSide - 1);
+		this.createPlayer(0x00ff00, this.mZonesPerSide - 1, 0);
+		this.createPlayer(0x0000ff, this.mZonesPerSide - 1, this.mZonesPerSide - 1);
 	},
-
+	
 	/**
-	* initTestData
-	*	Dedicated initialization function for test data
-	*	Needs to be removed in final version
+	* createPlayer
+	*	Adds a player to the game
+	*
+	* @param c : player color
+	* @param sr : player starting row
+	* @param sc : player starting column
+	*
+	* @returns : player index
 	*/
-	initTestData: function()
+	createPlayer: function(c, sr, sc)
 	{
-		this.mZones[0][0].setOwner(this.mPlayerRed);
-		this.mZones[this.mZonesPerSide-1][0].setOwner(this.mPlayerOrange);
-		this.mZones[0][this.mZonesPerSide-1].setOwner(this.mPlayerGreen);
-		this.mZones[this.mZonesPerSide-1][this.mZonesPerSide-1].setOwner(this.mPlayerWhite);
+		var player = new app.player(this.mPlayers.length);
+		player.mColor = c;
+		this.mZones[sr][sc].setOwner(player);
+		this.mPlayers.push(player);
+		return this.mPlayers.length - 1;
 	},
     	
 	/**
@@ -187,8 +247,12 @@ app.game =
 		app.controls.update(dt);
 
 		// Update zones
-		this.updateZoneOwnerships();
+		for(var i = 0; i < this.mZones.length; i++)
+			for(var j = 0; j < this.mZones[i].length; j++)
+				this.mZones[i][j].update(dt);
 		this.mLastSpawn += dt;
+		this.mSpawnStatusBar.setStatus(1.0 - (this.mLastSpawn / this.mTimePerSpawn));
+		
 		if((this.mLastSpawn += dt) > this.mTimePerSpawn)
 		{
 			this.mLastSpawn %= this.mTimePerSpawn;
@@ -207,14 +271,17 @@ app.game =
 					Math.random() * this.mWorldDepth,
 					true);
 			}
-			
 		}
 
 		// Filter character array
 		this.mCharacters = this.mCharacters.filter(function(c)
 			{
 				if(!c.mActive) 
+				{
+					app.game.mZones[c.mCurrZoneRow][c.mCurrZoneCol].
+						ownerRemovedCharacter(c.mOwner);
 					app.game.mScene.remove(c.mMesh);
+				}
 				return c.mActive;
 			});
 		for(var i = 0; i < this.mCharacters.length; i++)
@@ -243,14 +310,6 @@ app.game =
 		if(currZoneRow != undefined && currZoneCol != undefined)
 			this.mZones[currZoneRow][currZoneCol].
 				ownerAttachedCharacter(character.mOwner);
-	},
-
-	/**
-	* updateZoneOwnerships
-	*	Logic for determining who controls each zone
-	*/
-	updateZoneOwnerships: function()
-	{
 	},
 
 	/**

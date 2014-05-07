@@ -13,6 +13,7 @@ app.controls =
 	mCamTilt:		256.0,
 	mCamTiltBoundFactor:	0.1,
 	mCamYOffset:		512.0,
+	mCamAllowance:		128.0,
 	mKeyMoveLeft:		app.KEYBOARD["KEY_A"],
 	mKeyMoveRight:		app.KEYBOARD["KEY_D"],
 	mKeyMoveForward:	app.KEYBOARD["KEY_W"],
@@ -43,15 +44,15 @@ app.controls =
 		this.mCamera.position.z += this.mCamVelocity.z * dt;
 
 		// Constrain camera to world
-		if(this.mCamera.position.x < app.game.mWorldXMin)	
-			this.mCamera.position.x = app.game.mWorldXMin;
-		else if(this.mCamera.position.x > app.game.mWorldXMax)	
-			this.mCamera.position.x = app.game.mWorldXMax;
+		if(this.mCamera.position.x < app.game.mWorldXMin - this.mCamAllowance)	
+			this.mCamera.position.x = app.game.mWorldXMin - this.mCamAllowance;
+		else if(this.mCamera.position.x > app.game.mWorldXMax + this.mCamAllowance)	
+			this.mCamera.position.x = app.game.mWorldXMax + this.mCamAllowance;
 
-		if(this.mCamera.position.z + (this.mCamTilt * this.mCamTiltBoundFactor) < app.game.mWorldZMin)
-			this.mCamera.position.z = app.game.mWorldZMin - (this.mCamTilt * this.mCamTiltBoundFactor);
-		else if(this.mCamera.position.z - (this.mCamTilt * this.mCamTiltBoundFactor) > app.game.mWorldZMax)
-			this.mCamera.position.z = app.game.mWorldZMax + (this.mCamTilt * this.mCamTiltBoundFactor);
+		if(this.mCamera.position.z + (this.mCamTilt * this.mCamTiltBoundFactor) < app.game.mWorldZMin - this.mCamAllowance)
+			this.mCamera.position.z = app.game.mWorldZMin - this.mCamAllowance - (this.mCamTilt * this.mCamTiltBoundFactor);
+		else if(this.mCamera.position.z - (this.mCamTilt * this.mCamTiltBoundFactor) > app.game.mWorldZMax + this.mCamAllowance)
+			this.mCamera.position.z = app.game.mWorldZMax + this.mCamAllowance + (this.mCamTilt * this.mCamTiltBoundFactor);
 
 		this.mCamera.lookAt(new THREE.Vector3(
 			this.mCamera.position.x,

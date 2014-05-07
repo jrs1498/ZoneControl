@@ -47,6 +47,7 @@ app.log = function(string)
 	queue.loadFile("js/zone.js");
 	queue.loadFile("js/character.js");
 	queue.loadFile("js/player.js");
+	queue.loadFile("js/statusbar.js");
 	
 	function handleFileLoad(e){
 		console.log(e + " loaded");
