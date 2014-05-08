@@ -11,7 +11,8 @@ the bubbles game will be properties of app.
 var app = app || {};
 
 // CONSTANTS of app
-app.KEYBOARD = {
+app.KEYBOARD = 
+{
 	"KEY_LEFT": 	37, 
 	"KEY_UP": 	38, 
 	"KEY_RIGHT": 	39, 
@@ -21,6 +22,19 @@ app.KEYBOARD = {
 	"KEY_A":	65,
 	"KEY_S":	83,
 	"KEY_D":	68
+};
+
+app.IMAGES = 
+{
+	"IMG_SOLDIER":	undefined
+};
+
+app.MATERIALS =
+{
+	"MAT_CHARACTER_P0":	undefined,
+	"MAT_CHARACTER_P1": undefined,
+	"MAT_CHARACTER_P2":	undefined,
+	"MAT_CHARACTER_P3": undefined
 };
 
 // properties of app
@@ -48,6 +62,7 @@ app.log = function(string)
 	queue.loadFile("js/character.js");
 	queue.loadFile("js/player.js");
 	queue.loadFile("js/statusbar.js");
+	queue.loadFile("js/animator.js");
 	
 	function handleFileLoad(e){
 		console.log(e + " loaded");

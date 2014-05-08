@@ -26,18 +26,26 @@ app.game =
 	mZones: 	[],
 
 	mPlayers:		[],
+	mPlayer0Color:	0xffffff,
+	mPlayer1Color:	0xff0000,
+	mPlayer2Color:	0x00ff00,
+	mPlayer3Color:	0x0000ff,
+	mWinner: undefined,
 
 	mLastSpawn:	0.0,
 	mTimePerSpawn:	10.0,
 	mSpawnStatusBar: undefined,
 
-	mCharWidth:	24,
-	mCharHeight:	32,
+	mCharWidth:	96,
+	mCharHeight:	96,
 	mCharTilt:	-(3.14159 / 4),
 	mCharacters:	[],
+	mCharacterAnimator: undefined,
+	mCharacterCorpseTime: 8,
 	myobjects: [],
 	paused: false,
 	mDt: 1/60,
+	mTestKills: false,
 		
 	/**
 	* init
@@ -48,6 +56,7 @@ app.game =
 		app.log("app.game.init() called");
 		this.initThreeJS();
 		this.initGame();
+		this.loadContent();
 
 		app.log("--- START GAME LOOP --");
 		this.gameLoop();
@@ -208,6 +217,36 @@ app.game =
 	},
 	
 	/**
+	* loadContent
+	*	Load all game content here
+	*/
+	loadContent: function()
+	{
+		app.log("app.game.loadContent() called");
+		
+		// Load character content
+		app.IMAGES["IMG_SOLDIER"] = new THREE.ImageUtils.loadTexture("./images/soldier64x64.png");
+		app.IMAGES["IMG_SOLDIER"].wrapS = app.IMAGES["IMG_SOLDIER"].wrapT = THREE.RepeatWrapping;
+		
+		app.MATERIALS["MAT_CHARACTER_P0"] = new THREE.MeshPhongMaterial({color: this.mPlayer0Color, overdraw: true, map: app.IMAGES["IMG_SOLDIER"], transparent: true});
+		app.MATERIALS["MAT_CHARACTER_P1"] = new THREE.MeshPhongMaterial({color: this.mPlayer1Color, overdraw: true, map: app.IMAGES["IMG_SOLDIER"], transparent: true});
+		app.MATERIALS["MAT_CHARACTER_P2"] = new THREE.MeshPhongMaterial({color: this.mPlayer2Color, overdraw: true, map: app.IMAGES["IMG_SOLDIER"], transparent: true});
+		app.MATERIALS["MAT_CHARACTER_P3"] = new THREE.MeshPhongMaterial({color: this.mPlayer3Color, overdraw: true, map: app.IMAGES["IMG_SOLDIER"], transparent: true});
+		
+		this.mCharacterAnimator = new app.animator(8, 16, 64, 64, 1024 / 512);
+											// Animation Index				// Start	// End		// Time		// Looping?			
+		this.mCharacterAnimator.addAnimation(app.character.State.IDLE, 		59, 		61, 		0.075, 		true);
+		this.mCharacterAnimator.addAnimation(app.character.State.IDLE, 		59, 		61, 		0.075, 		true);
+		this.mCharacterAnimator.addAnimation(app.character.State.MOVE, 		29, 		40, 		0.075, 		true);
+		this.mCharacterAnimator.addAnimation(app.character.State.AMOVE, 	19, 		28, 		0.075, 		true);
+		this.mCharacterAnimator.addAnimation(app.character.State.ATTACK,	0,			18,			0.075,		false);
+		this.mCharacterAnimator.addAnimation(app.character.State.DYING,		41,			58,			0.075,		false);
+		this.mCharacterAnimator.addAnimation(app.character.State.CHEER1,	86,			89,			0.075,		true);
+		this.mCharacterAnimator.addAnimation(app.character.State.CHEER2,	90,			98,			0.075,		true);
+		this.mCharacterAnimator.addAnimation(app.character.State.CHEER3,	99,			106,		0.075,		true);
+	},
+	
+	/**
 	* createPlayer
 	*	Adds a player to the game
 	*
@@ -246,30 +285,33 @@ app.game =
 	{
 		app.controls.update(dt);
 
-		// Update zones
-		for(var i = 0; i < this.mZones.length; i++)
-			for(var j = 0; j < this.mZones[i].length; j++)
-				this.mZones[i][j].update(dt);
-		this.mLastSpawn += dt;
-		this.mSpawnStatusBar.setStatus(1.0 - (this.mLastSpawn / this.mTimePerSpawn));
-		
-		if((this.mLastSpawn += dt) > this.mTimePerSpawn)
+		if(this.mWinner == undefined)
 		{
-			this.mLastSpawn %= this.mTimePerSpawn;
-			app.log("Spawning a wave");
-			for(var row = 0; row < this.mZones.length; row++)
-				for(var col = 0; col < this.mZones[row].length; col++)
-				{
-					this.mZones[row][col].spawnCharacter();
-				}
+			// Update zones
+			for(var i = 0; i < this.mZones.length; i++)
+				for(var j = 0; j < this.mZones[i].length; j++)
+					this.mZones[i][j].update(dt);
+			this.mLastSpawn += dt;
+			this.mSpawnStatusBar.setStatus(1.0 - (this.mLastSpawn / this.mTimePerSpawn));
 			
-			// For now, give random destinations
-			for(var i = 0; i < this.mCharacters.length; i++)
+			if((this.mLastSpawn += dt) > this.mTimePerSpawn)
 			{
-				this.mCharacters[i].setDestination(
-					Math.random() * this.mWorldWidth,
-					Math.random() * this.mWorldDepth,
-					true);
+				this.mLastSpawn %= this.mTimePerSpawn;
+				app.log("Spawning a wave");
+				for(var row = 0; row < this.mZones.length; row++)
+					for(var col = 0; col < this.mZones[row].length; col++)
+					{
+						this.mZones[row][col].spawnCharacter();
+					}
+				
+				// For now, give random destinations
+				for(var i = 0; i < this.mCharacters.length; i++)
+				{
+					this.mCharacters[i].setDestination(
+						Math.random() * this.mWorldWidth,
+						Math.random() * this.mWorldDepth,
+						this.mTestKills);
+				}
 			}
 		}
 
@@ -310,6 +352,27 @@ app.game =
 		if(currZoneRow != undefined && currZoneCol != undefined)
 			this.mZones[currZoneRow][currZoneCol].
 				ownerAttachedCharacter(character.mOwner);
+	},
+	
+	/**
+	* checkForWinner
+	*	Check to see if a player has won the game
+	*
+	* @param p : player to check
+	*/
+	checkForWinner: function()
+	{
+		var potentialWinner = this.mZones[0][0].mOwner;
+		for(var i = 0; i < this.mZones.length; i++)
+			for(var j = 0; j < this.mZones[i].length; j++)
+				if(this.mZones[i][j].mOwner != potentialWinner)
+					return;
+				
+		app.log("Player " + potentialWinner.mPlayerID + " has won the game!");
+		this.mWinner = potentialWinner;
+		
+		for(var i = 0; i < this.mCharacters.length; i++)
+			this.mCharacters[i].mState = app.character.State.CHEER1 + i % 3;
 	},
 
 	/**

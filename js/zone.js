@@ -117,6 +117,7 @@ app.zone = function()
 			this.mOwnership[owner.mPlayerID] = this.mTimeToCapture;
 		}
 		this.updateStatusBar();
+		app.game.checkForWinner();
 	};
 	
 	/**
@@ -136,19 +137,18 @@ app.zone = function()
 		if(this.mOwner == undefined)
 			return;
 
-		var characterTexture = THREE.ImageUtils.loadTexture("./images/unit.png");
-
-		var characterGeo = new THREE.PlaneGeometry(40, 40, 1, 1);
-		var characterMat = new THREE.MeshPhongMaterial({color: this.mOwner.mColor, overdraw: true, map: characterTexture, transparent: true});
-		var characterMesh = new THREE.Mesh(characterGeo, characterMat);
+		var characterMesh = new THREE.Mesh(
+			new THREE.PlaneGeometry(app.game.mCharWidth, app.game.mCharHeight, 1, 1),
+			app.MATERIALS["MAT_CHARACTER_P" + this.mOwner.mPlayerID]);
 		characterMesh.position = new THREE.Vector3(
 					this.mMesh.position.x,	
 					app.game.mCharHeight/2,
 					this.mMesh.position.z);
-		characterMesh.rotation.set(app.game.mCharTilt, 0, 0);
+		characterMesh.rotation.set(app.game.mCharTilt, 0, 3.14159 / 2.0);
 
 		var character = new app.character(this.mOwner);
 		character.mMesh = characterMesh;
+		character.mAnimator = app.game.mCharacterAnimator;
 		app.game.mCharacters.push(character);
 
 		app.game.mScene.add(characterMesh);

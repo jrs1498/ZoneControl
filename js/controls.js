@@ -76,6 +76,14 @@ app.controls =
 		case this.mKeyMoveBackward:
 			this.computeCamVelocity();
 			break;
+		
+		case app.KEYBOARD["KEY_UP"]:
+			app.game.mTestKills = true;
+			break;
+			
+		case app.KEYBOARD["KEY_DOWN"]:
+			app.game.mTestKills = false;
+			break;
 		}
 	},
 

@@ -12,37 +12,22 @@ app.character = function()
 		this.mActive		= true;
 		this.mMoveSpeed 	= 120.0;
 		this.mHealth 		= 100.0;
-		this.mDestination 	= new THREE.Vector3(0,0,0);
+		this.mDestination 	= new THREE.Vector3(0,app.game.mCharHeight / 2.0,0);
 		this.mTarget 		= undefined;
 		this.mAttackRadius	= 200.0;
-		this.mAttackDamage	= 20.0;
-		this.mAttackRate	= 1.0;
+		this.mAttackDamage	= 40.0;
+		this.mAttackRate	= 4.0;
 		this.mLastAttack	= 0.0;
-		this.mMesh 		= undefined;
-		this.mState 		= this.State.IDLE;
+		this.mMesh 			= undefined;
+		this.mState 		= app.character.State.IDLE;
+		this.mStateTime		= 0.0;
+		this.mAnimator		= undefined;
 		this.mOwner 		= owner;
 		this.mCurrZoneRow	= undefined;
 		this.mCurrZoneCol	= undefined;
 	};
-
+	
 	var p = character.prototype;
-
-	/**
-	* State
-	*	Represents all potential character states
-	*
-	* IDLE : Will stand in place until it is attacked, which will cause it to attack back
-	* MOVE : Character will move to its destination, returning to idle when it is reached
-	* AMOVE : Same behavior as move, but if the character encunters an enemy, it engages
-	* ATTACK : Character will continue to chase down and attack its target until it dies
-	*/
-	p.State =
-	{
-		IDLE: 0,
-		MOVE: 1,
-		AMOVE: 2,
-		ATTACKING: 3
-	};
 
 	/**
 	* update
@@ -52,6 +37,22 @@ app.character = function()
 	*/
 	p.update = function(dt)
 	{
+		if(!this.mActive)
+			return;
+	
+		// Update state & animation info
+		this.mStateTime += dt;
+		this.mLastAttack += dt;
+		if(this.mAnimator != undefined)
+		{
+			var flip = this.mDestination.x < this.mMesh.position.x ? false : true;
+		
+			var animUvs = this.mAnimator.getFrameUvs(this.mState, this.mStateTime, flip);
+			this.mMesh.geometry.faceVertexUvs[0][0] = [animUvs[0], animUvs[1], animUvs[3]];
+			this.mMesh.geometry.faceVertexUvs[0][1] = [animUvs[1], animUvs[2], animUvs[3]];
+			this.mMesh.geometry.uvsNeedUpdate = true;
+		}
+	
 		// Check for containing zone
 		var zoneRow = 
 			(this.mMesh.position.x - 
@@ -79,14 +80,14 @@ app.character = function()
 		// Update according to character state
 		switch(this.mState)
 		{
-		case this.State.IDLE:
+		case app.character.State.IDLE:
 		{
-
+		
 		}
 			break;
 
-		case this.State.MOVE:
-		case this.State.AMOVE:
+		case app.character.State.MOVE:
+		case app.character.State.AMOVE:
 		{
 			var diff = new THREE.Vector3(
 				this.mDestination.x - this.mMesh.position.x,
@@ -105,7 +106,7 @@ app.character = function()
 				this.mMesh.position.x = this.mDestination.x;
 				this.mMesh.position.y = app.game.mCharHeight/2;
 				this.mMesh.position.z = this.mDestination.z;
-				this.mState = this.State.IDLE;
+				this.setState(app.character.State.IDLE);
 				return;
 			}
 
@@ -113,34 +114,64 @@ app.character = function()
 			this.mMesh.position.y = app.game.mCharHeight/2;
 			this.mMesh.position.z += diff.z;
 
-			if(this.mState == this.State.AMOVE)
+			if(this.mState == app.character.State.AMOVE)
 				this.checkForEnemies();
 		}
 			break;
 
-		case this.State.ATTACK:
+		case app.character.State.ATTACK:
 		{
-			if(this.mTarget == undefined || !this.mTarget.mActive)
+			if(this.mTarget == undefined
+			|| !this.mTarget.mActive
+			|| this.mTarget.mState == app.character.State.DYING)
 			{
 				this.mTarget = undefined;
 				if(this.mMesh.position.equals(this.mDestination))
-					this.mState = this.State.IDLE;
+					this.setState(app.character.State.IDLE);
 				else
-					this.mState = this.State.AMOVE;
+					this.setState(app.character.State.AMOVE);
 				return;
 			}
 
-			this.mLastAttack += dt;
 			if(this.mLastAttack >= this.mAttackRate)
 			{
 				this.mLastAttack %= this.mAttackRate;
-				// TODO: attack animation here
 				this.mTarget.takeDamage(this.mAttackDamage);
+				this.mStateTime = 0.0;
 			}
 		}
 			break;
+			
+		case app.character.State.DYING:
+		{
+			if(this.mStateTime >= app.game.mCharacterCorpseTime)
+				this.mActive = false;
 		}
+			break;
+			
+		case app.character.State.CHEER:
+		{
+		
+		}
+			break;
+		}	// End Switch
 
+	};
+	
+	/**
+	* setState
+	*	Set this character's state. State should only be set here, not directly
+	*
+	* @param state : this character's new state
+	*/
+	p.setState = function(state)
+	{
+		if(this.mState == state
+		|| this.mState == app.character.State.DYING)
+			return;
+			
+		this.mState = state;
+		this.mStateTime = 0.0;
 	};
 
 	/**
@@ -153,6 +184,9 @@ app.character = function()
 		{
 			var local = app.game.mCharacters[i];
 			if(local.mOwner == this.mOwner)
+				continue;
+				
+			if(local.mState == app.character.State.DYING)
 				continue;
 
 			var diff = new THREE.Vector3(
@@ -181,9 +215,9 @@ app.character = function()
 		this.mDestination.x = x;
 		this.mDestination.z = z;
 		if(!amove)
-			this.mState = this.State.MOVE;
+			this.setState(app.character.State.MOVE);
 		else
-			this.mState = this.State.AMOVE;
+			this.setState(app.character.State.AMOVE);
 	};
 
 	/**
@@ -195,7 +229,7 @@ app.character = function()
 	p.setTarget = function(target)
 	{
 		this.mTarget = target;
-		this.mState = this.State.ATTACK;
+		this.setState(app.character.State.ATTACK);
 	};
 
 	/**
@@ -221,9 +255,30 @@ app.character = function()
 	*/
 	p.die = function()
 	{
-		// TODO: death animation here
-		this.mActive = false;
+		this.setState(app.character.State.DYING);
 	};
 
 	return character;
 }();
+
+/**
+	* State
+	*	Represents all potential character states
+	*
+	* IDLE : Will stand in place until it is attacked, which will cause it to attack back
+	* MOVE : Character will move to its destination, returning to idle when it is reached
+	* AMOVE : Same behavior as move, but if the character encunters an enemy, it engages
+	* ATTACK : Character will continue to chase down and attack its target until it dies
+	*/
+	app.character.State =
+	{
+		IDLE: 0,
+		AIDLE: 1,
+		MOVE: 2,
+		AMOVE: 3,
+		ATTACK: 4,
+		DYING: 5,
+		CHEER1: 6,
+		CHEER2: 7,
+		CHEER3: 8
+	};
