@@ -56,11 +56,12 @@ app.log = function(string)
 	queue.on("fileload", handleFileLoad, this);
 	queue.on("complete", complete, this);
 	queue.loadFile("js/lib/three.min.js");
-	queue.loadFile("js/controls.js");
 	queue.loadFile("js/game.js");
 	queue.loadFile("js/zone.js");
 	queue.loadFile("js/character.js");
 	queue.loadFile("js/player.js");
+	queue.loadFile("js/humancontroller.js");
+	queue.loadFile("js/aicontroller.js");
 	queue.loadFile("js/statusbar.js");
 	queue.loadFile("js/animator.js");
 	
@@ -98,7 +99,7 @@ app.log = function(string)
 				if(!app.keydown[e.keyCode])
 				{
 					app.keydown[e.keyCode] = true;
-					app.controls.injectKeyDown(e);
+					app.game.injectKeyDown(e);
 				}
 			});
 				
@@ -106,9 +107,24 @@ app.log = function(string)
 				if(app.keydown[e.keyCode])
 				{
 					app.keydown[e.keyCode] = false;
-					app.controls.injectKeyUp(e);
+					app.game.injectKeyUp(e);
 				}
 			});
+			
+			window.addEventListener("mousedown",function(e)
+				{
+					app.game.injectMouseDown(e);
+				});
+				
+			window.addEventListener("mouseup",function(e)
+				{
+					app.game.injectMouseUp(e);
+				});
+				
+			window.addEventListener("mousemove",function(e)
+				{
+					app.game.injectMouseMove(e);
+				});
 			
 			
 			// start game

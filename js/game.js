@@ -23,6 +23,7 @@ app.game =
 	mZonesPerSide:	8,
 	mZoneWidth:	undefined,
 	mZoneHeight:	undefined,
+	mZoneMeshes:	[],
 	mZones: 	[],
 
 	mPlayers:		[],
@@ -30,11 +31,15 @@ app.game =
 	mPlayer1Color:	0xff0000,
 	mPlayer2Color:	0x00ff00,
 	mPlayer3Color:	0x0000ff,
+	mHumanPlayerID:	undefined,
 	mWinner: undefined,
 
 	mLastSpawn:	0.0,
 	mTimePerSpawn:	10.0,
 	mSpawnStatusBar: undefined,
+	
+	mKeyEventListeners: [],
+	mMouseEventListeners: [],
 
 	mCharWidth:	96,
 	mCharHeight:	96,
@@ -93,8 +98,6 @@ app.game =
 	{
 		app.log("app.game.initGame() called");
 		
-		app.controls.init(this.mCamera);
-		
 		// World / zone dimensions
 		this.mWorldWidth = this.mWorldXMax - this.mWorldXMin;
 		this.mWorldDepth = this.mWorldZMax - this.mWorldZMin;
@@ -103,8 +106,6 @@ app.game =
 	
 		// Scene lighting
 		var directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
-		//directionalLight.position.set(0,10,0);
-		//directionalLight.rotation.set(90.0, 0, 1.0);
 		directionalLight.rotation.x = 3.14159 / 3.0;
 		this.mScene.add(directionalLight);
 		
@@ -130,6 +131,8 @@ app.game =
 					this.mZoneWidth * 2.0,
 					this.mZoneDepth,
 					color, 0.8);
+					
+				this.mZoneMeshes.push(zone.mMesh);
                                 
 				this.mZones[x][z] = zone;
 			}
@@ -210,10 +213,12 @@ app.game =
 		this.mSpawnStatusBar.setStatus(1.0);
 		
 		// Players
-		this.createPlayer(0xffffff, 0, 0);
-		this.createPlayer(0xff0000, 0, this.mZonesPerSide - 1);
-		this.createPlayer(0x00ff00, this.mZonesPerSide - 1, 0);
-		this.createPlayer(0x0000ff, this.mZonesPerSide - 1, this.mZonesPerSide - 1);
+		this.createPlayer(0xffffff, true, 0, 0);
+		this.createPlayer(0xff0000, false, 0, this.mZonesPerSide - 1);
+		this.createPlayer(0x00ff00, false, this.mZonesPerSide - 1, 0);
+		this.createPlayer(0x0000ff, false, this.mZonesPerSide - 1, this.mZonesPerSide - 1);
+		
+		this.mHumanPlayerID = 0;
 	},
 	
 	/**
@@ -251,15 +256,20 @@ app.game =
 	*	Adds a player to the game
 	*
 	* @param c : player color
+	* @param h : true for human, false for ai
 	* @param sr : player starting row
 	* @param sc : player starting column
 	*
 	* @returns : player index
 	*/
-	createPlayer: function(c, sr, sc)
+	createPlayer: function(c, h, sr, sc)
 	{
-		var player = new app.player(this.mPlayers.length);
-		player.mColor = c;
+		var player = new app.player(this.mPlayers.length, c, h);
+		if(h)
+		{
+			this.mKeyEventListeners.push(player.mController);
+			this.mMouseEventListeners.push(player.mController);
+		}
 		this.mZones[sr][sc].setOwner(player);
 		this.mPlayers.push(player);
 		return this.mPlayers.length - 1;
@@ -283,7 +293,9 @@ app.game =
 	*/
 	update: function(dt)
 	{
-		app.controls.update(dt);
+		// Update each controller
+		for(var i = 0; i < this.mPlayers.length; i++)
+			this.mPlayers[i].mController.update(dt);
 
 		if(this.mWinner == undefined)
 		{
@@ -297,7 +309,6 @@ app.game =
 			if((this.mLastSpawn += dt) > this.mTimePerSpawn)
 			{
 				this.mLastSpawn %= this.mTimePerSpawn;
-				app.log("Spawning a wave");
 				for(var row = 0; row < this.mZones.length; row++)
 					for(var col = 0; col < this.mZones[row].length; col++)
 					{
@@ -305,13 +316,13 @@ app.game =
 					}
 				
 				// For now, give random destinations
-				for(var i = 0; i < this.mCharacters.length; i++)
-				{
-					this.mCharacters[i].setDestination(
-						Math.random() * this.mWorldWidth,
-						Math.random() * this.mWorldDepth,
-						this.mTestKills);
-				}
+				//for(var i = 0; i < this.mCharacters.length; i++)
+				//{
+				//	this.mCharacters[i].setDestination(
+				//		Math.random() * this.mWorldWidth,
+				//		Math.random() * this.mWorldDepth,
+				//		this.mTestKills);
+				//}
 			}
 		}
 
@@ -382,5 +393,65 @@ app.game =
 	draw: function()
 	{
 		this.mRenderer.render(this.mScene, this.mCamera);
+	},
+	
+	/**
+	* injectKeyDown
+	*	Key down event handler
+	*
+	* @param e : key event
+	*/
+	injectKeyDown: function(e)
+	{
+		for(var i = 0; i < this.mKeyEventListeners.length; i++)
+			this.mKeyEventListeners[i].injectKeyDown(e);
+	},
+	
+	/**
+	* injectKeyUp
+	*	Key up event handler
+	*
+	* @param e : key event
+	*/
+	injectKeyUp: function(e)
+	{
+		for(var i = 0; i < this.mKeyEventListeners.length; i++)
+			this.mKeyEventListeners[i].injectKeyUp(e);
+	},
+	
+	/**
+	* injectMouseDown
+	*	Mouse down event handler
+	*
+	* @param e : mouse event
+	*/
+	injectMouseDown: function(e)
+	{
+		for(var i = 0; i < this.mMouseEventListeners.length; i++)
+			this.mMouseEventListeners[i].injectMouseDown(e);
+	},
+	
+	/**
+	* injectMouseUp
+	*	Mouse up event handler
+	*
+	* @param e : mouse event
+	*/
+	injectMouseUp: function(e)
+	{
+		for(var i = 0; i < this.mMouseEventListeners.length; i++)
+			this.mMouseEventListeners[i].injectMouseUp(e);
+	},
+	
+	/**
+	* injectMouseMove
+	*	Mouse move event handler
+	*
+	* @param e : mouse event
+	*/
+	injectMouseMove: function(e)
+	{
+		for(var i = 0; i < this.mMouseEventListeners.length; i++)
+			this.mMouseEventListeners[i].injectMouseMove(e);
 	}
 };
