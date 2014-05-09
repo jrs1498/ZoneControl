@@ -15,7 +15,7 @@ app.character = function()
 		this.mDestination 	= new THREE.Vector3(0,app.game.mCharHeight / 2.0,0);
 		this.mTarget 		= undefined;
 		this.mAttackRadius	= 200.0;
-		this.mAttackDamage	= 40.0;
+		this.mAttackDamage	= 20.0;
 		this.mAttackRate	= 4.0;
 		this.mLastAttack	= 0.0;
 		this.mMesh 			= undefined;
@@ -108,14 +108,14 @@ app.character = function()
 			if(vdist >= ddist)
 			{
 				this.mMesh.position.x = this.mDestination.x;
-				this.mMesh.position.y = app.game.mCharHeight/2;
+				//this.mMesh.position.y = 0;
 				this.mMesh.position.z = this.mDestination.z;
 				this.setState(app.character.State.AIDLE);
 				return;
 			}
 
 			this.mMesh.position.x += diff.x;
-			this.mMesh.position.y = app.game.mCharHeight/2;
+			//this.mMesh.position.y = app.game.mCharHeight/2;
 			this.mMesh.position.z += diff.z;
 
 			if(this.mState == app.character.State.AMOVE)
@@ -222,6 +222,7 @@ app.character = function()
 	p.setDestination = function(x, z, amove)
 	{
 		this.mDestination.x = x;
+		this.mDestination.y = this.mMesh.position.y;
 		this.mDestination.z = z;
 		if(!amove)
 			this.setState(app.character.State.MOVE);

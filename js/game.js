@@ -230,7 +230,8 @@ app.game =
 		app.log("app.game.loadContent() called");
 		
 		// Load character content
-		app.IMAGES["IMG_SOLDIER"] = new THREE.ImageUtils.loadTexture("./images/soldier64x64.png");
+		//app.IMAGES["IMG_SOLDIER"] = new THREE.ImageUtils.loadTexture("./images/soldier64x64.png");
+		app.IMAGES["IMG_SOLDIER"] = new THREE.ImageUtils.loadTexture("./images/soldier128x128.png");
 		app.IMAGES["IMG_SOLDIER"].wrapS = app.IMAGES["IMG_SOLDIER"].wrapT = THREE.RepeatWrapping;
 		
 		app.MATERIALS["MAT_CHARACTER_P0"] = new THREE.MeshPhongMaterial({color: this.mPlayer0Color, overdraw: true, map: app.IMAGES["IMG_SOLDIER"], transparent: true});
@@ -238,7 +239,8 @@ app.game =
 		app.MATERIALS["MAT_CHARACTER_P2"] = new THREE.MeshPhongMaterial({color: this.mPlayer2Color, overdraw: true, map: app.IMAGES["IMG_SOLDIER"], transparent: true});
 		app.MATERIALS["MAT_CHARACTER_P3"] = new THREE.MeshPhongMaterial({color: this.mPlayer3Color, overdraw: true, map: app.IMAGES["IMG_SOLDIER"], transparent: true});
 		
-		this.mCharacterAnimator = new app.animator(8, 16, 64, 64, 1024 / 512);
+		//this.mCharacterAnimator = new app.animator(8, 16, 64, 64, 1024 / 512);
+		this.mCharacterAnimator = new app.animator(16, 8, 128, 128, 1024 / 2048);
 											// Animation Index				// Start	// End		// Time		// Looping?			
 		this.mCharacterAnimator.addAnimation(app.character.State.IDLE, 		59, 		61, 		0.075, 		true);
 		this.mCharacterAnimator.addAnimation(app.character.State.AIDLE, 	59, 		61, 		0.075, 		true);

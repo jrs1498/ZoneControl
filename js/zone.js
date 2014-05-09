@@ -142,7 +142,7 @@ app.zone = function()
 			app.MATERIALS["MAT_CHARACTER_P" + this.mOwner.mPlayerID]);
 		characterMesh.position = new THREE.Vector3(
 					this.mMesh.position.x - app.game.mZoneWidth / 2 + Math.random() * app.game.mZoneWidth,	
-					app.game.mCharHeight/2,
+					-1, //0, //app.game.mCharHeight/2,
 					this.mMesh.position.z - app.game.mZoneDepth / 2 + Math.random() * app.game.mZoneDepth);
 		characterMesh.rotation.set(app.game.mCharTilt, 0, 3.14159 / 2.0);
 
