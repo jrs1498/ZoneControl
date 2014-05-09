@@ -27,10 +27,13 @@ app.humanController = function()
 		this.mProjector			= new THREE.Projector();
 		this.mClickStart		= undefined;
 		this.mCharSelection		= [];
+		this.mSelectionColor		= 0x00ff00;
+		this.mQueuedKey			= this.mCharMove;
 		
 		var selectionGeo 		= new THREE.PlaneGeometry(100, 100, 1, 1);
-		var selectionMat 		= new THREE.MeshPhongMaterial({color: 0x000000, overdraw: true});
+		var selectionMat 		= new THREE.MeshPhongMaterial({color: this.mSelectionColor, overdraw: true, transparent: true, opacity: 0.5});
 		this.mSelectionMesh		= new THREE.Mesh(selectionGeo, selectionMat);
+		this.mSelectionMesh.visible = false;
 		app.game.mScene.add(this.mSelectionMesh);
 		
 		// USER CONFIGURATION
@@ -38,6 +41,11 @@ app.humanController = function()
 		this.mCamMoveRight 		= app.KEYBOARD["KEY_D"];
 		this.mCamMoveForward 	= app.KEYBOARD["KEY_W"];
 		this.mCamMoveBackward 	= app.KEYBOARD["KEY_S"];
+
+		this.mCharMove			= app.KEYBOARD["KEY_M"];
+		this.mCharAMove			= app.KEYBOARD["KEY_N"];
+		this.mCharIdle			= app.KEYBOARD["KEY_H"];
+		this.mCharAIdle			= app.KEYBOARD["KEY_J"];
 	};
 	
 	var p = humanController.prototype;
@@ -80,6 +88,24 @@ app.humanController = function()
 		case this.mCamMoveForward:
 		case this.mCamMoveBackward:
 			this.updateCamVelocity();
+			break;
+
+		case this.mCharMove:
+			this.mQueuedKey = this.mCharMove;
+			break;
+
+		case this.mCharAMove:
+			this.mQueuedKey = this.mCharAMove;
+			break;
+
+		case this.mCharIdle:
+			for(var i = 0; i < this.mCharSelection.length; i++)
+				this.mCharSelection[i].setState(app.character.State.IDLE);
+			break;
+
+		case this.mCharAIdle:
+			for(var i = 0; i < this.mCharSelection.length; i++)
+				this.mCharSelection[i].setState(app.character.State.AIDLE);
 			break;
 		}
 	};
@@ -128,29 +154,14 @@ app.humanController = function()
 		
 		if(this.mClickStart.x != e.clientX || this.mClickStart.y != e.clientY)
 		{
-			// Cast a ray from the original mouse click
-			var originIntersections = this.getScreenIntersections(this.mClickStart.x, this.mClickStart.y);
-			
-			if(originIntersections.length > 0)
+			var vector = new THREE.Vector3(e.clientX, e.clientY);
+			if(this.updateSelectionBox(vector))
 			{
-				var origin 	= originIntersections[0].point;
-				var end 	= intersections[0].point
-				
-				var left 	= origin.x 	< end.x ? origin.x : end.x;
-				var right 	= origin.x 	> end.x ? origin.x : end.x;
-				var bottom 	= origin.z 	< end.z ? origin.z : end.z;
-				var top 	= origin.z 	> end.z ? origin.z : end.z;
-				var elev	= 10;
-			
-				this.mSelectionMesh.geometry.vertices[0] = new THREE.Vector3(left, elev, bottom);
-				this.mSelectionMesh.geometry.vertices[1] = new THREE.Vector3(right, elev, bottom);
-				this.mSelectionMesh.geometry.vertices[2] = new THREE.Vector3(right, elev, top);
-				this.mSelectionMesh.geometry.vertices[3] = new THREE.Vector3(left, elev, top);
-				this.mSelectionMesh.geometry.verticesNeedUpdate = true;
-			
-				//this.mCharSelection = this.getCharactersInSelection(
-				//	intersects[0].point,
-				//	originIntersects[0].point);
+				// We have a selection
+				this.mCharSelection = this.getCharactersInSelection(
+					this.mSelectionMesh.geometry.vertices[0],
+					this.mSelectionMesh.geometry.vertices[3]);
+				this.mSelectionMesh.visible = false;
 			}
 		}
 		else
@@ -170,8 +181,11 @@ app.humanController = function()
 						intersections[0].point.z -
 						app.game.mZoneDepth / 2 +
 						Math.random() * app.game.mZoneDepth;
-				
-					this.mCharSelection[i].setDestination(destX, destZ, true);
+					
+					if(this.mQueuedKey == this.mCharMove)
+						this.mCharSelection[i].setDestination(destX, destZ, false);
+					else
+						this.mCharSelection[i].setDestination(destX, destZ, true);
 				}
 			}
 		}
@@ -188,8 +202,10 @@ app.humanController = function()
 		// Only interested in selection dragging (left mouse)
 		if(e.buttons != 1)
 			return;
-			
 		
+		this.mSelectionMesh.visible = true;
+		var vector = new THREE.Vector3(e.clientX, e.clientY);
+		this.updateSelectionBox(vector);
 	};
 	
 	/**
@@ -256,10 +272,10 @@ app.humanController = function()
 	
 		return this.getPlayerCharacters().filter(function(c)
 			{
-				if(c.mMesh.position.x < minX) return false;
-				if(c.mMesh.position.x > maxX) return false;
-				if(c.mMesh.position.z < minZ) return false;
-				if(c.mMesh.position.z > maxZ) return false;
+				if(c.mMesh.position.x + app.game.mCharWidth / 2 < minX) return false;
+				if(c.mMesh.position.x - app.game.mCharWidth / 2 > maxX) return false;
+				if(c.mMesh.position.z + app.game.mCharHeight / 2 < minZ) return false;
+				if(c.mMesh.position.z - app.game.mCharHeight / 2 > maxZ) return false;
 				return true;
 			});
 	};
@@ -290,10 +306,38 @@ app.humanController = function()
 	*	Update the selection box to match from the origin vector to the supplied vector
 	*
 	* @param v : selection end vector
+	*
+	* @returns : false if failed to update (v out of world bounds)
 	*/
 	p.updateSelectionBox = function(v)
 	{
+		// Get raycast intersection from v
+		var endIntersections 	= this.getScreenIntersections(v.x, v.y);
+		if(endIntersections.length < 1)
+			return false;
+
+		// Get raycast intersections from origin
+		var originIntersections = this.getScreenIntersections(this.mClickStart.x, this.mClickStart.y);
+		if(originIntersections.length < 1)
+			return false;
+
+		// Intersections points
+		var origin 	= originIntersections[0].point;
+		var end 	= endIntersections[0].point
 		
+		var left 	= origin.x 	< end.x ? origin.x : end.x;
+		var right 	= origin.x 	> end.x ? origin.x : end.x;
+		var bottom 	= origin.z 	< end.z ? origin.z : end.z;
+		var top 	= origin.z 	> end.z ? origin.z : end.z;
+		var elev	= 20;
+		
+		this.mSelectionMesh.geometry.vertices[0] = new THREE.Vector3(left, elev, bottom);
+		this.mSelectionMesh.geometry.vertices[1] = new THREE.Vector3(right, elev, bottom);
+		this.mSelectionMesh.geometry.vertices[3] = new THREE.Vector3(right, elev, top);
+		this.mSelectionMesh.geometry.vertices[2] = new THREE.Vector3(left, elev, top);
+		this.mSelectionMesh.geometry.verticesNeedUpdate = true;
+
+		return true;	
 	};
 	
 	return humanController;

@@ -21,7 +21,11 @@ app.KEYBOARD =
 	"KEY_W":	87,
 	"KEY_A":	65,
 	"KEY_S":	83,
-	"KEY_D":	68
+	"KEY_D":	68,
+	"KEY_H":	72,
+	"KEY_J":	74,
+	"KEY_N":	78,
+	"KEY_M":	77
 };
 
 app.IMAGES = 

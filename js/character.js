@@ -81,8 +81,12 @@ app.character = function()
 		switch(this.mState)
 		{
 		case app.character.State.IDLE:
+		case app.character.State.AIDLE:
 		{
-		
+			if(this.mState == app.character.State.AIDLE)
+			{
+				this.checkForEnemies();
+			}
 		}
 			break;
 
@@ -106,7 +110,7 @@ app.character = function()
 				this.mMesh.position.x = this.mDestination.x;
 				this.mMesh.position.y = app.game.mCharHeight/2;
 				this.mMesh.position.z = this.mDestination.z;
-				this.setState(app.character.State.IDLE);
+				this.setState(app.character.State.AIDLE);
 				return;
 			}
 
@@ -127,7 +131,7 @@ app.character = function()
 			{
 				this.mTarget = undefined;
 				if(this.mMesh.position.equals(this.mDestination))
-					this.setState(app.character.State.IDLE);
+					this.setState(app.character.State.AIDLE);
 				else
 					this.setState(app.character.State.AMOVE);
 				return;
@@ -169,7 +173,12 @@ app.character = function()
 		if(this.mState == state
 		|| this.mState == app.character.State.DYING)
 			return;
-			
+		
+/*
+		if(state == app.character.State.IDLE
+		|| state == app.character.State.AIDLE)
+			this.mDestination = this.mMesh.position;
+*/
 		this.mState = state;
 		this.mStateTime = 0.0;
 	};
@@ -250,6 +259,17 @@ app.character = function()
 	};
 
 	/**
+	* setColor
+	*	Set the color of this character
+	*
+	* @param c : color
+	*/
+	p.setColor = function(c)
+	{
+		this.mMesh.material.color = c;		
+	};
+
+	/**
 	* die
 	*	Kill this character and remove it from the game level
 	*/
@@ -265,10 +285,13 @@ app.character = function()
 	* State
 	*	Represents all potential character states
 	*
-	* IDLE : Will stand in place until it is attacked, which will cause it to attack back
+	* IDLE : Will stand in place and not care about defending itself
+	* AIDLE : Will stand in place, and will attack anything if it's close enough
 	* MOVE : Character will move to its destination, returning to idle when it is reached
 	* AMOVE : Same behavior as move, but if the character encunters an enemy, it engages
 	* ATTACK : Character will continue to chase down and attack its target until it dies
+	* DYING : Character will bleed out, fall over and die
+	* CHEER : Character will cheer!
 	*/
 	app.character.State =
 	{

@@ -34,8 +34,8 @@ app.game =
 	mHumanPlayerID:	undefined,
 	mWinner: undefined,
 
-	mLastSpawn:	0.0,
-	mTimePerSpawn:	10.0,
+	mLastSpawn:	40.0,
+	mTimePerSpawn:	40.0,
 	mSpawnStatusBar: undefined,
 	
 	mKeyEventListeners: [],
@@ -241,7 +241,7 @@ app.game =
 		this.mCharacterAnimator = new app.animator(8, 16, 64, 64, 1024 / 512);
 											// Animation Index				// Start	// End		// Time		// Looping?			
 		this.mCharacterAnimator.addAnimation(app.character.State.IDLE, 		59, 		61, 		0.075, 		true);
-		this.mCharacterAnimator.addAnimation(app.character.State.IDLE, 		59, 		61, 		0.075, 		true);
+		this.mCharacterAnimator.addAnimation(app.character.State.AIDLE, 	59, 		61, 		0.075, 		true);
 		this.mCharacterAnimator.addAnimation(app.character.State.MOVE, 		29, 		40, 		0.075, 		true);
 		this.mCharacterAnimator.addAnimation(app.character.State.AMOVE, 	19, 		28, 		0.075, 		true);
 		this.mCharacterAnimator.addAnimation(app.character.State.ATTACK,	0,			18,			0.075,		false);
