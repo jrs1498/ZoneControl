@@ -313,17 +313,28 @@ app.humanController = function()
 	{
 		// Get raycast intersection from v
 		var endIntersections 	= this.getScreenIntersections(v.x, v.y);
+		var end;
 		if(endIntersections.length < 1)
-			return false;
+		{
+			//return false;
+			end = new THREE.Vector3(0.0, 0.0, 0.0);
+		}
+		else
+		{
+			end = endIntersections[0].point;
+		}
 
 		// Get raycast intersections from origin
 		var originIntersections = this.getScreenIntersections(this.mClickStart.x, this.mClickStart.y);
+		var origin;
 		if(originIntersections.length < 1)
-			return false;
-
-		// Intersections points
-		var origin 	= originIntersections[0].point;
-		var end 	= endIntersections[0].point
+		{
+			origin = new THREE.Vector3(0.0, 0.0, 0.0);
+		}
+		else
+		{
+			origin = originIntersections[0].point;
+		}
 		
 		var left 	= origin.x 	< end.x ? origin.x : end.x;
 		var right 	= origin.x 	> end.x ? origin.x : end.x;

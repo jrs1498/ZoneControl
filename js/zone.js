@@ -49,12 +49,63 @@ app.zone = function()
 		if(this.isZoneOccupied())
 		{
 			// Zone has units in it
+			if(this.mOwner != undefined)
+			{
+				// There is an owner
+				var sum = 0;
+				for(var i = 0; i < this.mOccupants.length; i++)
+					if(i != this.mOwner.mPlayerID)
+						sum += this.mOccupants[i];
+						
+				var diff = this.mOccupants[this.mOwner.mPlayerID] - sum;
+				if(diff < 0)
+					diff *= dt;
+					
+				this.incrementOwnership(this.mOwner.mPlayerID, diff);
+			}
+			else
+			{
+				// There is not an owner
+				// Who has the most occupants?
+				var max = 0;
+				for(var i = 1; i < this.mOccupants.length; i++)
+					max = this.mOccupants[max] > this.mOccupants[i] ? max : i;
+					
+				// Does he have more than all other teams combined?
+				var sum = 0;
+				for(var i = 0; i < this.mOccupants.length; i++)
+					if(i != max)
+						sum += this.mOccupants[i];
+					
+				// If not, then do nothing
+				var diff = this.mOccupants[max] - sum;
+				if(diff <= 0)
+					return;
+					
+				// Otherwise, increment ownership
+				this.incrementOwnership(max, diff * dt);
+			}
 		}
 		else
 		{
-			// Zone does not have units in it
-			for(var i = 0; i < this.mOwnership.length; i++)
-				this.incrementOwnership(i, -dt);
+			// No occupants at zone
+			if(this.mOwner != undefined)
+			{
+				// There is an owner
+				for(var i = 0; i < this.mOwnership.length; i++)
+				{
+					if(this.mOwner.mPlayerID == i)
+						this.mOwnership[i] = this.mTimeToCapture;
+					else
+						this.mOwnership[i] = 0.0;
+				}
+			}
+			else
+			{
+				// There is not an owner
+				for(var i = 0; i < this.mOwnership.length; i++)
+					this.mOwnership[i] = 0.0;
+			}
 		}
 	};
 	
@@ -85,13 +136,15 @@ app.zone = function()
 		if(this.mOwnership[o] <= 0.0)
 		{
 			this.mOwnership[o] = 0.0;
-			// TODO: If this is the actual owner, then they lose this zone
+			if(this.mOwner != undefined)
+				this.setOwner(undefined);
 		}
 		else if(this.mOwnership[o] >= this.mTimeToCapture)
 		{
 			this.mOwnership[o] = this.mTimeToCapture;
 			// TODO: This zone now belongs to a new owners
 			this.setOwner(app.game.mPlayers[o]);
+			this.mStatusBar.setVisible(false);
 		}
 		this.updateStatusBar();
 	};
@@ -126,6 +179,13 @@ app.zone = function()
 	*/
 	p.updateStatusBar = function()
 	{
+		// Find who has ownership
+		var i = 0;
+		for(; i < this.mOwnership.length; i++)
+			if(this.mOwnership[i] > 0)
+				break;
+				
+		this.mStatusBar.setStatus(this.mOwnership[i] / this.mTimeToCapture);
 	};
 
 	/**
@@ -169,13 +229,18 @@ app.zone = function()
 	p.ownerAttachedCharacter = function(owner)
 	{
 		this.mOccupants[owner.mPlayerID]++;
+		/*
 		if(this.mOccupants[owner.mPlayerID] >= 2)
 			this.setOwner(owner);
+		*/
+		this.mStatusBar.setVisible(true);
 	};
 
 	p.ownerRemovedCharacter = function(owner)
 	{
 		this.mOccupants[owner.mPlayerID]--;
+		if(!this.isZoneOccupied())
+			this.mStatusBar.setVisible(false);
 	};
 
 	return zone;

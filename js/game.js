@@ -316,15 +316,6 @@ app.game =
 					{
 						this.mZones[row][col].spawnCharacter();
 					}
-				
-				// For now, give random destinations
-				//for(var i = 0; i < this.mCharacters.length; i++)
-				//{
-				//	this.mCharacters[i].setDestination(
-				//		Math.random() * this.mWorldWidth,
-				//		Math.random() * this.mWorldDepth,
-				//		this.mTestKills);
-				//}
 			}
 		}
 

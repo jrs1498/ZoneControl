@@ -18,6 +18,7 @@ app.character = function()
 		this.mAttackDamage	= 20.0;
 		this.mAttackRate	= 4.0;
 		this.mLastAttack	= 0.0;
+		this.mLastAttack	= 0.0;
 		this.mMesh 			= undefined;
 		this.mState 		= app.character.State.IDLE;
 		this.mStateTime		= 0.0;
