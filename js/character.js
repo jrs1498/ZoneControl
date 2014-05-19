@@ -211,7 +211,16 @@ app.character = function()
 
 			this.setTarget(local);
 		}
-	}
+	};
+
+	/**
+	* attack
+	*	Cause this character to fire a round!
+	*/
+	p.attack = function()
+	{
+		app.log("app.character.attack()");
+	};
 
 	/**
 	* setDestination

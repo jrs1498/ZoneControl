@@ -220,6 +220,15 @@ app.game =
 		
 		this.mHumanPlayerID = 0;
 	},
+
+	/**
+	* newGame
+	*	Reset the game level and start a new game
+	*/
+	newGame: function()
+	{
+		app.log("app.game.newGame()");
+	},
 	
 	/**
 	* loadContent
