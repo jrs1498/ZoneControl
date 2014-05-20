@@ -233,9 +233,12 @@ app.character = function()
 	*/
 	p.setDestination = function(x, z, amove)
 	{
-		this.mDestination.x = x;
+		var tolerance = 40;
+		this.mDestination.x = x > app.game.mWorldXMin + tolerance ? x : app.game.mWorldXMin + tolerance;
+		this.mDestination.x = x < app.game.mWorldXMax - tolerance ? x : app.game.mWorldXMax - tolerance;
+		this.mDestination.z = z > app.game.mWorldZMin + tolerance ? z : app.game.mWorldZMin + tolerance;
+		this.mDestination.z = z < app.game.mWorldZMax - tolerance ? z : app.game.mWorldZMax - tolerance;
 		this.mDestination.y = this.mMesh.position.y;
-		this.mDestination.z = z;
 		if(!amove)
 			this.setState(app.character.State.MOVE);
 		else
