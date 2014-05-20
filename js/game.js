@@ -56,7 +56,18 @@ app.game =
 	paused: false,
 	mDt: 1/60,
 	mTestKills: false,
-		
+	
+	// Widget Controls
+	controls: new function() {
+        this.spawnRate = 40.0;
+        this.animationSpeed = 5.0;
+		this.cameraSpeed = 768.0;
+    },
+	
+	gui: new dat.GUI(),
+    
+	
+	
 	/**
 	* init
 	*	Root game initialization function
@@ -236,6 +247,11 @@ app.game =
 		
 		this.mHumanPlayerID = 0;
 		this.newGame();
+		
+		// GUI
+		this.gui.add(this.controls, 'spawnRate', 10, 70);
+		this.gui.add(this.controls, 'animationSpeed', 0, 10);
+		this.gui.add(this.controls, 'cameraSpeed', 200, 800);
 	},
 
 	/**
@@ -365,6 +381,16 @@ app.game =
 		for(var i = 0; i < this.mCharacters.length; i++)
 		{
 			this.mCharacters[i].update(dt);
+		}
+		
+		// Update the variables to match those
+		// of the widgets
+		app.game.mTimePerSpawn = this.controls.spawnRate;
+		app.log(app.game.mTimePerSpawn);
+		app.game.mAnimatedObjectTimeFactor = this.controls.animationSpeed;
+		if(app.game.mPlayers[0])
+		{
+			app.game.mPlayers[0].mController.mCamSpeed = this.controls.cameraSpeed;
 		}
 	},
 

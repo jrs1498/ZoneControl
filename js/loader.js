@@ -60,6 +60,7 @@ app.log = function(string)
 	queue.on("fileload", handleFileLoad, this);
 	queue.on("complete", complete, this);
 	queue.loadFile("js/lib/three.min.js");
+	queue.loadFile("js/lib/dat.gui.js");
 	queue.loadFile("js/game.js");
 	queue.loadFile("js/zone.js");
 	queue.loadFile("js/character.js");
