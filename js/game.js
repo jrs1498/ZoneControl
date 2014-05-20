@@ -291,6 +291,7 @@ app.game =
 		app.MATERIALS["MAT_CHARACTER_P3"] = new THREE.MeshPhongMaterial({color: this.mPlayer3Color, overdraw: true, map: app.IMAGES["IMG_SOLDIER"], transparent: true});
 		app.MATERIALS["MAT_DIRT"] = new THREE.MeshPhongMaterial({color: 0xffffff, overdraw: true, map: app.IMAGES["IMG_DIRT"]});
 		app.MATERIALS["MAT_ROCK"] = new THREE.MeshPhongMaterial({color: 0xffffff, overdraw: true, map: app.IMAGES["IMG_ROCK"]});
+		app.MATERIALS["MAT_SELECTION"] = new THREE.MeshPhongMaterial({color: 0x00ff00, overdraw: true});
 		
 		//this.mCharacterAnimator = new app.animator(8, 16, 64, 64, 1024 / 512);
 		this.mCharacterAnimator = new app.animator(16, 8, 128, 128, 1024 / 2048);
@@ -397,7 +398,6 @@ app.game =
 		// Update the variables to match those
 		// of the widgets
 		app.game.mTimePerSpawn = this.controls.spawnRate;
-		app.log(app.game.mTimePerSpawn);
 		app.game.mAnimatedObjectTimeFactor = this.controls.animationSpeed;
 		if(app.game.mPlayers[0])
 		{

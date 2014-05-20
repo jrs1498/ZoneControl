@@ -42,7 +42,8 @@ app.MATERIALS =
 	"MAT_CHARACTER_P2":	undefined,
 	"MAT_CHARACTER_P3": undefined,
 	"MAT_DIRT":	undefined,
-	"MAT_ROCK":	undefined
+	"MAT_ROCK":	undefined,
+	"MAT_SELECTION":	undefined
 };
 
 // properties of app

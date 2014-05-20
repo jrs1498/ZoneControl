@@ -175,11 +175,15 @@ app.humanController = function()
 			var vector = new THREE.Vector3(e.clientX, e.clientY);
 			if(this.updateSelectionBox(vector))
 			{
-				// We have a selection
+				// We have a new selection, clear the old one
+				for(var i = 0; i < this.mCharSelection.length; i++)
+					this.mCharSelection[i].notifyDeselected();
 				this.mCharSelection = this.getCharactersInSelection(
 					this.mSelectionMesh.geometry.vertices[0],
 					this.mSelectionMesh.geometry.vertices[3]);
 				this.mSelectionMesh.visible = false;
+				for(var i = 0; i < this.mCharSelection.length; i++)
+					this.mCharSelection[i].notifySelected();
 			}
 		}
 		else

@@ -26,6 +26,12 @@ app.character = function()
 		this.mOwner 		= owner;
 		this.mCurrZoneRow	= undefined;
 		this.mCurrZoneCol	= undefined;
+
+		var selectionGeo = new THREE.SphereGeometry(5, 8, 8);
+		this.mSelectionSphere = new THREE.Mesh(selectionGeo, app.MATERIALS["MAT_SELECTION"]);
+		this.mSelectionSphere.position.y = 24;
+		this.mSelectionSphere.visible = false;
+		app.game.mScene.add(this.mSelectionSphere);
 	};
 	
 	var p = character.prototype;
@@ -159,6 +165,29 @@ app.character = function()
 			break;
 		}	// End Switch
 
+		this.mSelectionSphere.position.x = this.mMesh.position.x;
+		this.mSelectionSphere.position.z = this.mMesh.position.z - 40;
+
+	};
+
+	/**
+	* notifySelected
+	*	Called from the humancontroller object, telling this character that it has
+	*	just been added to a controller selection
+	*/
+	p.notifySelected = function()
+	{
+		this.mSelectionSphere.visible = true;
+	};
+
+	/**
+	* notifyDeselected
+	*	Called from the humancontroller object, telling this character that it has
+	*	just been removed from a controller selection
+	*/
+	p.notifyDeselected = function()
+	{
+		this.mSelectionSphere.visible = false;
 	};
 	
 	/**
