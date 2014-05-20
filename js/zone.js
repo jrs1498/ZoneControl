@@ -15,11 +15,12 @@ app.zone = function()
 	* @param w, h, d : zone 3D dimensions
 	* @param c : zone color
 	* @param r : ratio of the status bar width to zone width
+	* @param t : material to be used
 	*/
-	function zone(x, y, z, w, h, d, c, r)
+	function zone(x, y, z, w, h, d, c, r, t)
 	{
 		var zoneGeo = new THREE.BoxGeometry(w, h, d, 1, 1, 1);
-		var zoneMat = new THREE.MeshPhongMaterial({color: c, overdraw: true});
+		var zoneMat = t;
 		this.mMesh = new THREE.Mesh(zoneGeo, zoneMat);
 		this.mMesh.position = new THREE.Vector3(x,y-(h/2),z);
 		app.game.mScene.add(this.mMesh);

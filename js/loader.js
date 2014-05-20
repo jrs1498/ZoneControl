@@ -30,7 +30,9 @@ app.KEYBOARD =
 
 app.IMAGES = 
 {
-	"IMG_SOLDIER":	undefined
+	"IMG_SOLDIER":	undefined,
+	"IMG_DIRT":	undefined,
+	"IMG_ROCK":	undefined
 };
 
 app.MATERIALS =
@@ -38,7 +40,9 @@ app.MATERIALS =
 	"MAT_CHARACTER_P0":	undefined,
 	"MAT_CHARACTER_P1": undefined,
 	"MAT_CHARACTER_P2":	undefined,
-	"MAT_CHARACTER_P3": undefined
+	"MAT_CHARACTER_P3": undefined,
+	"MAT_DIRT":	undefined,
+	"MAT_ROCK":	undefined
 };
 
 // properties of app
