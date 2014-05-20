@@ -138,11 +138,14 @@ app.log = function(string)
 			// Load sound
 			createjs.Sound.alternateExtensions = ["mp3"];
 			createjs.Sound.registerSound({id:"bullet", src:"sounds/gun2.ogg"});
-			
-			//createjs.Sound.addEventListener("fileload", handleFileLoad);
-			//function handleFileLoad(e){
-			//	console.log(e.id,e.src)
-			//}
+			createjs.Sound.registerSound({id:"background", src:"sounds/C&C Red Alert music (Hell March).ogg"});
+			createjs.Sound.addEventListener("fileload", handleFileLoad);
+			function handleFileLoad(e){
+				if(e.src == "sounds/C&C Red Alert music (Hell March).ogg")
+				{
+					app.game.startSoundtrack();
+				}
+			}
 			
 			// start game
 			app.game.init();

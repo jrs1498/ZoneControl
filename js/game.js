@@ -515,5 +515,11 @@ app.game =
 	{
 		for(var i = 0; i < this.mMouseEventListeners.length; i++)
 			this.mMouseEventListeners[i].injectMouseMove(e);
+	},
+	
+	// Plays the background music
+	startSoundtrack: function(){
+		createjs.Sound.stop();
+		createjs.Sound.play("background",{loop: -1, volume: 0.2});
 	}
 };
