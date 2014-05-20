@@ -218,7 +218,7 @@ app.character = function()
 	p.attack = function()
 	{
 		/* add attack sound here */
-
+		createjs.Sound.play("bullet", {volume: 0.2});
 		this.mLastAttack %= this.mAttackRate;
 		this.mTarget.takeDamage(this.mAttackDamage);
 		this.mStateTime = 0.0;

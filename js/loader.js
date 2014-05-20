@@ -129,7 +129,15 @@ app.log = function(string)
 				{
 					app.game.injectMouseMove(e);
 				});
+				
+			// Load sound
+			createjs.Sound.alternateExtensions = ["mp3"];
+			createjs.Sound.registerSound({id:"bullet", src:"sounds/gun2.ogg"});
 			
+			//createjs.Sound.addEventListener("fileload", handleFileLoad);
+			//function handleFileLoad(e){
+			//	console.log(e.id,e.src)
+			//}
 			
 			// start game
 			app.game.init();
