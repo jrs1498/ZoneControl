@@ -219,6 +219,7 @@ app.game =
 		this.createPlayer(0x0000ff, false, this.mZonesPerSide - 1, this.mZonesPerSide - 1);
 		
 		this.mHumanPlayerID = 0;
+		this.newGame();
 	},
 
 	/**

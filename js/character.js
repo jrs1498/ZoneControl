@@ -140,9 +140,7 @@ app.character = function()
 
 			if(this.mLastAttack >= this.mAttackRate)
 			{
-				this.mLastAttack %= this.mAttackRate;
-				this.mTarget.takeDamage(this.mAttackDamage);
-				this.mStateTime = 0.0;
+				this.attack();
 			}
 		}
 			break;
@@ -219,7 +217,11 @@ app.character = function()
 	*/
 	p.attack = function()
 	{
-		app.log("app.character.attack()");
+		/* add attack sound here */
+
+		this.mLastAttack %= this.mAttackRate;
+		this.mTarget.takeDamage(this.mAttackDamage);
+		this.mStateTime = 0.0;
 	};
 
 	/**
