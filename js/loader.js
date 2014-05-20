@@ -25,14 +25,16 @@ app.KEYBOARD =
 	"KEY_H":	72,
 	"KEY_J":	74,
 	"KEY_N":	78,
-	"KEY_M":	77
+	"KEY_M":	77,
+	"KEY_P":	80
 };
 
 app.IMAGES = 
 {
 	"IMG_SOLDIER":	undefined,
 	"IMG_DIRT":	undefined,
-	"IMG_ROCK":	undefined
+	"IMG_ROCK":	undefined,
+	"IMG_INSTRUCTIONS":	undefined
 };
 
 app.MATERIALS =
@@ -43,7 +45,8 @@ app.MATERIALS =
 	"MAT_CHARACTER_P3": undefined,
 	"MAT_DIRT":	undefined,
 	"MAT_ROCK":	undefined,
-	"MAT_SELECTION":	undefined
+	"MAT_SELECTION":	undefined,
+	"MAT_INSTRUCTIONS":	undefined
 };
 
 // properties of app

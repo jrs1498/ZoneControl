@@ -284,6 +284,7 @@ app.game =
 		app.IMAGES["IMG_DIRT"].wrapS = app.IMAGES["IMG_DIRT"].wrapT = THREE.RepeatWrapping;
 		app.IMAGES["IMG_ROCK"] = new THREE.ImageUtils.loadTexture("./images/rock.jpg");
 		app.IMAGES["IMG_ROCK"].wrapS = app.IMAGES["IMG_ROCK"].wrapT = THREE.RepeatWrapping;
+		app.IMAGES["IMG_INSTRUCTIONS"] = new THREE.ImageUtils.loadTexture("./images/instructions.png");
 		
 		app.MATERIALS["MAT_CHARACTER_P0"] = new THREE.MeshPhongMaterial({color: this.mPlayer0Color, overdraw: true, map: app.IMAGES["IMG_SOLDIER"], transparent: true});
 		app.MATERIALS["MAT_CHARACTER_P1"] = new THREE.MeshPhongMaterial({color: this.mPlayer1Color, overdraw: true, map: app.IMAGES["IMG_SOLDIER"], transparent: true});
@@ -292,6 +293,7 @@ app.game =
 		app.MATERIALS["MAT_DIRT"] = new THREE.MeshPhongMaterial({color: 0xffffff, overdraw: true, map: app.IMAGES["IMG_DIRT"]});
 		app.MATERIALS["MAT_ROCK"] = new THREE.MeshPhongMaterial({color: 0xffffff, overdraw: true, map: app.IMAGES["IMG_ROCK"]});
 		app.MATERIALS["MAT_SELECTION"] = new THREE.MeshPhongMaterial({color: 0x00ff00, overdraw: true});
+		app.MATERIALS["MAT_INSTRUCTIONS"] = new THREE.MeshPhongMaterial({color: 0xffffff, overdraw: true, map: app.IMAGES["IMG_INSTRUCTIONS"], transparent: true});
 		
 		//this.mCharacterAnimator = new app.animator(8, 16, 64, 64, 1024 / 512);
 		this.mCharacterAnimator = new app.animator(16, 8, 128, 128, 1024 / 2048);

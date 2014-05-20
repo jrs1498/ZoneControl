@@ -23,7 +23,7 @@ app.humanController = function()
 		this.mCamTilt 			= 256.0;
 		this.mCamYOffset 		= 512.0;
 		this.mCamConstrained	= true;
-		
+
 		this.mProjector			= new THREE.Projector();
 		this.mClickStart		= undefined;
 		this.mCharSelection		= [];
@@ -46,6 +46,13 @@ app.humanController = function()
 		this.mCharAMove			= app.KEYBOARD["KEY_N"];
 		this.mCharIdle			= app.KEYBOARD["KEY_H"];
 		this.mCharAIdle			= app.KEYBOARD["KEY_J"];
+		this.mToggleInstructions	= app.KEYBOARD["KEY_P"];
+
+		var instructionPlane = new THREE.PlaneGeometry(200, 200);
+		this.mInstructions = new THREE.Mesh(instructionPlane, app.MATERIALS["MAT_INSTRUCTIONS"]);
+		this.mInstructions.position.y = 400;
+		this.mInstructions.rotation.x = -3.14159 / 3;
+		app.game.mScene.add(this.mInstructions);
 	};
 	
 	var p = humanController.prototype;
@@ -74,6 +81,9 @@ app.humanController = function()
 			this.mCamera.position.x,
 			0.0,
 			this.mCamera.position.z - this.mCamTilt));
+
+		this.mInstructions.position.x = this.mCamera.position.x;
+		this.mInstructions.position.z = this.mCamera.position.z - 50;
 	};
 
 	/**
@@ -124,6 +134,10 @@ app.humanController = function()
 
 		case 32:
 			this.moveTo(app.game.mWorldXMax / 2, app.game.mWorldZMax);
+			break;
+	
+		case this.mToggleInstructions:
+			this.mInstructions.visible = !this.mInstructions.visible;
 			break;
 		}
 	};
