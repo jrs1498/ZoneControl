@@ -307,6 +307,34 @@ app.game =
 		this.mCharacterAnimator.addAnimation(app.character.State.CHEER1,	86,			89,			0.075,		true);
 		this.mCharacterAnimator.addAnimation(app.character.State.CHEER2,	90,			98,			0.075,		true);
 		this.mCharacterAnimator.addAnimation(app.character.State.CHEER3,	99,			106,		0.075,		true);
+
+		// Build a tetrahedron
+		var tetraGeom = new THREE.Geometry();
+		var tetraHalfH = 80.0;
+		var tetraBase = 80.0;
+		var tetraIncr = (3.14159 * 2.0) / 3.0;
+		var tetraMat = new THREE.MeshPhongMaterial({color: 0xffffff, overdraw: true});
+
+		for(var i = 0; i < 4; i++)
+		{
+			tetraGeom.vertices.push(new THREE.Vector3(Math.cos(tetraIncr * 1) * tetraBase, -tetraHalfH, Math.sin(tetraIncr * 1) * tetraBase));
+			tetraGeom.vertices.push(new THREE.Vector3(Math.cos(tetraIncr * 2) * tetraBase, -tetraHalfH, Math.sin(tetraIncr * 2) * tetraBase));
+			tetraGeom.vertices.push(new THREE.Vector3(Math.cos(tetraIncr * 3) * tetraBase, -tetraHalfH, Math.sin(tetraIncr * 3) * tetraBase));
+			tetraGeom.vertices.push(new THREE.Vector3(0.0, tetraHalfH, 0.0));
+			tetraGeom.verticesNeedUpdate = true;
+			tetraGeom.faces.push(new THREE.Face3(0, 1, 2));
+			tetraGeom.faces.push(new THREE.Face3(1, 0, 3));
+			tetraGeom.faces.push(new THREE.Face3(2, 1, 3));
+			tetraGeom.faces.push(new THREE.Face3(0, 2, 3));
+			var tetraMesh = new THREE.Mesh(tetraGeom, tetraMat);
+			tetraMesh.position.y = tetraHalfH;
+			
+			tetraMesh.rotation.y = (tetraIncr / 2) + (i * tetraIncr);
+			tetraMesh.position.x = (i % 2) * this.mWorldXMax;
+			tetraMesh.position.z = ((i - (i % 2)) / 2) * this.mWorldZMax;
+
+			this.mScene.add(tetraMesh);
+		}
 	},
 	
 	/**
