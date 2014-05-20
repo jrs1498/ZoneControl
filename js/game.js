@@ -14,6 +14,7 @@ app.game =
 
 	// Project requirements
 	mElapsedTime: 0.0,
+	mAnimatedObjectTimeFactor: 5.0,
 	mAnimatedObjects: [],
 
 	// Game Level
@@ -347,8 +348,8 @@ app.game =
 		}
 
 		// Animated the objects
-		this.mAnimatedObjects[0].translateOnAxis(new THREE.Vector3(0, 1, 0), Math.sin(this.mElapsedTime) * 1);
-		this.mAnimatedObjects[1].translateOnAxis(new THREE.Vector3(0, 1, 0), Math.sin(this.mElapsedTime) * 1);
+		this.mAnimatedObjects[0].position.y = 0 + Math.sin(this.mElapsedTime * this.mAnimatedObjectTimeFactor) * 40;
+		this.mAnimatedObjects[1].position.y = 0 + -Math.sin(this.mElapsedTime * this.mAnimatedObjectTimeFactor) * 40;
 
 		// Filter character array
 		this.mCharacters = this.mCharacters.filter(function(c)
