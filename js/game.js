@@ -12,6 +12,10 @@ app.game =
 	mScene: 	undefined,
 	mCamera: 	undefined,
 
+	// Project requirements
+	mElapsedTime: 0.0,
+	mAnimatedObjects: [],
+
 	// Game Level
 	mWorldXMin:	0.0,
 	mWorldXMax:	1024.0,
@@ -201,6 +205,17 @@ app.game =
 			-224.0,
 			baseMesh.position.z + ((this.mZonesPerSide * this.mZoneDepth) / 2.0) + sideThickness / 2.0);
 		this.mScene.add(bottomWallMesh);
+
+		var pistonGeo = new THREE.BoxGeometry(192, 384, 192);
+		var pistonMat = new THREE.MeshPhongMaterial({color: 0xff0000, overdraw: true});
+		var piston1 = new THREE.Mesh(pistonGeo, pistonMat);
+		piston1.position.set(largeLeftMesh.position.x, 0, largeLeftMesh.position.z);
+		var piston2 = new THREE.Mesh(pistonGeo, pistonMat);
+		piston2.position.set(largeRightMesh.position.x, 0, largeRightMesh.position.z);
+		this.mScene.add(piston1);
+		this.mScene.add(piston2);
+		this.mAnimatedObjects.push(piston1);
+		this.mAnimatedObjects.push(piston2);
 		// -- END LEVEL GEOMETRY --
 		
 		this.mSpawnStatusBar = new app.statusbar(
@@ -305,6 +320,8 @@ app.game =
 	*/
 	update: function(dt)
 	{
+		this.mElapsedTime += dt;
+
 		// Update each controller
 		for(var i = 0; i < this.mPlayers.length; i++)
 			this.mPlayers[i].mController.update(dt);
@@ -328,6 +345,10 @@ app.game =
 					}
 			}
 		}
+
+		// Animated the objects
+		this.mAnimatedObjects[0].translateOnAxis(new THREE.Vector3(0, 1, 0), Math.sin(this.mElapsedTime) * 1);
+		this.mAnimatedObjects[1].translateOnAxis(new THREE.Vector3(0, 1, 0), Math.sin(this.mElapsedTime) * 1);
 
 		// Filter character array
 		this.mCharacters = this.mCharacters.filter(function(c)

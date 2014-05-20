@@ -22,7 +22,7 @@ app.humanController = function()
 		this.mCamVelocity 		= new THREE.Vector3(0,0,0);
 		this.mCamTilt 			= 256.0;
 		this.mCamYOffset 		= 512.0;
-		this.mCamConstrained	= false;
+		this.mCamConstrained	= true;
 		
 		this.mProjector			= new THREE.Projector();
 		this.mClickStart		= undefined;
@@ -64,13 +64,27 @@ app.humanController = function()
 		
 		if(this.mCamConstrained)
 		{
-			// TODO: constrain camera to world
+			this.mCamera.position.x = this.mCamera.position.x > app.game.mWorldXMin ? this.mCamera.position.x : app.game.mWorldXMin;
+			this.mCamera.position.x = this.mCamera.position.x < app.game.mWorldXMax ? this.mCamera.position.x : app.game.mWorldXMax;
+			this.mCamera.position.z = this.mCamera.position.z > app.game.mWorldZMin ? this.mCamera.position.z : app.game.mWorldZMin;
+			this.mCamera.position.z = this.mCamera.position.z < app.game.mWorldZMax ? this.mCamera.position.z : app.game.mWorldZMax;
 		}
 		
 		this.mCamera.lookAt(new THREE.Vector3(
 			this.mCamera.position.x,
 			0.0,
 			this.mCamera.position.z - this.mCamTilt));
+	};
+
+	/**
+	* move
+	*	Move this camera to the position specified
+	*/
+	p.moveTo = function(x, z)
+	{
+		this.mCamera.position.x = x;
+		this.mCamera.position.z = this.mCamYOffset;
+		this.mCamera.position.z = z;
 	};
 	
 	/**
@@ -106,6 +120,10 @@ app.humanController = function()
 		case this.mCharAIdle:
 			for(var i = 0; i < this.mCharSelection.length; i++)
 				this.mCharSelection[i].setState(app.character.State.AIDLE);
+			break;
+
+		case 32:
+			this.moveTo(app.game.mWorldXMax / 2, app.game.mWorldZMax);
 			break;
 		}
 	};
